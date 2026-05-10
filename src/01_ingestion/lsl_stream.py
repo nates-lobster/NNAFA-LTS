@@ -18,6 +18,11 @@ class EEGStream:
         if not self.inlet:
             self.connect()
         chunk, timestamps = self.inlet.pull_chunk(timeout=1.0, max_samples=self.chunk_size)
+        
+        # BlueMuse broadcasts a 5th AUX channel. We only need the first 4 (TP9, AF7, AF8, TP10).
+        if chunk and len(chunk[0]) > 4:
+            chunk = [sample[:4] for sample in chunk]
+            
         return chunk, timestamps
         
     def get_local_time(self):
