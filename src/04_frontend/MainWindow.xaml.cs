@@ -69,11 +69,11 @@ namespace Frontend
             
             // Background Shading for Brainwaves using reliable RGBA byte constructor (R, G, B, A)
             byte alpha = 60; // Semi-transparent
-            plot.Plot.Add.VerticalSpan(1, 4, new Color(100, 100, 100, alpha)); // Delta - Gray
-            plot.Plot.Add.VerticalSpan(4, 8, new Color(128, 0, 128, alpha));   // Theta - Purple
-            plot.Plot.Add.VerticalSpan(8, 12, new Color(0, 128, 0, alpha));    // Alpha - Green
-            plot.Plot.Add.VerticalSpan(12, 30, new Color(0, 0, 128, alpha));   // Beta - Blue
-            plot.Plot.Add.VerticalSpan(30, 40, new Color(128, 128, 0, alpha)); // Gamma - Yellow
+            plot.Plot.Add.HorizontalSpan(1, 4, new Color(100, 100, 100, alpha)); // Delta - Gray
+            plot.Plot.Add.HorizontalSpan(4, 8, new Color(128, 0, 128, alpha));   // Theta - Purple
+            plot.Plot.Add.HorizontalSpan(8, 12, new Color(0, 128, 0, alpha));    // Alpha - Green
+            plot.Plot.Add.HorizontalSpan(12, 30, new Color(0, 0, 128, alpha));   // Beta - Blue
+            plot.Plot.Add.HorizontalSpan(30, 40, new Color(128, 128, 0, alpha)); // Gamma - Yellow
             
             var scatter = plot.Plot.Add.Scatter(_psdFreqs, _psdPowers);
             scatter.Color = Color.FromHex("#89B4FA");
@@ -130,9 +130,13 @@ namespace Frontend
                 Dispatcher.Invoke(() => 
                 {
                     string scaleMode = "Magnitude";
-                    if (PsdScaleCombo.SelectedItem is System.Windows.Controls.ComboBoxItem item)
+                    if (RbLogarithmic.IsChecked == true)
                     {
-                        scaleMode = item.Content.ToString() ?? "Magnitude";
+                        scaleMode = "Logarithmic";
+                    }
+                    else if (RbStandard.IsChecked == true)
+                    {
+                        scaleMode = "Standard";
                     }
 
                     for (int i = 0; i < 129; i++)

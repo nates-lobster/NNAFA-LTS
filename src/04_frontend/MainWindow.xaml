@@ -61,12 +61,10 @@
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,10,0" Panel.ZIndex="1">
-                            <TextBlock Text="PSD Scale: " Foreground="#A6ADC8" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                            <ComboBox x:Name="PsdScaleCombo" Width="120" Background="#313244" Foreground="#CDD6F4" BorderBrush="#45475A">
-                                <ComboBoxItem Content="Magnitude" IsSelected="True"/>
-                                <ComboBoxItem Content="Logarithmic"/>
-                                <ComboBoxItem Content="Standard"/>
-                            </ComboBox>
+                            <TextBlock Text="PSD Scale: " Foreground="#A6ADC8" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                            <RadioButton x:Name="RbMagnitude" Content="Magnitude" IsChecked="True" Foreground="#CDD6F4" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                            <RadioButton x:Name="RbLogarithmic" Content="Logarithmic" Foreground="#CDD6F4" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                            <RadioButton x:Name="RbStandard" Content="Standard" Foreground="#CDD6F4" VerticalAlignment="Center"/>
                         </StackPanel>
                         <ScottPlot:WpfPlot x:Name="WpfPlotPSD_Monitor" Grid.Row="1"/>
                     </Grid>
