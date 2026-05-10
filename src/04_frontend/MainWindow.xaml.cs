@@ -67,12 +67,13 @@ namespace Frontend
             plot.Plot.YLabel("Power");
             plot.Plot.Axes.SetLimitsX(0, 45);
             
-            // Background Shading for Brainwaves
-            plot.Plot.Add.VerticalSpan(1, 4, Color.FromHex("#22444444")); // Delta
-            plot.Plot.Add.VerticalSpan(4, 8, Color.FromHex("#22880088")); // Theta
-            plot.Plot.Add.VerticalSpan(8, 12, Color.FromHex("#22008800")); // Alpha
-            plot.Plot.Add.VerticalSpan(12, 30, Color.FromHex("#22000088")); // Beta
-            plot.Plot.Add.VerticalSpan(30, 40, Color.FromHex("#22888800")); // Gamma
+            // Background Shading for Brainwaves using reliable RGBA byte constructor (R, G, B, A)
+            byte alpha = 60; // Semi-transparent
+            plot.Plot.Add.VerticalSpan(1, 4, new Color(100, 100, 100, alpha)); // Delta - Gray
+            plot.Plot.Add.VerticalSpan(4, 8, new Color(128, 0, 128, alpha));   // Theta - Purple
+            plot.Plot.Add.VerticalSpan(8, 12, new Color(0, 128, 0, alpha));    // Alpha - Green
+            plot.Plot.Add.VerticalSpan(12, 30, new Color(0, 0, 128, alpha));   // Beta - Blue
+            plot.Plot.Add.VerticalSpan(30, 40, new Color(128, 128, 0, alpha)); // Gamma - Yellow
             
             var scatter = plot.Plot.Add.Scatter(_psdFreqs, _psdPowers);
             scatter.Color = Color.FromHex("#89B4FA");
@@ -128,12 +129,23 @@ namespace Frontend
             {
                 Dispatcher.Invoke(() => 
                 {
-                    bool useLog = PsdScaleToggle.IsChecked == true;
+                    string scaleMode = "Magnitude";
+                    if (PsdScaleCombo.SelectedItem is System.Windows.Controls.ComboBoxItem item)
+                    {
+                        scaleMode = item.Content.ToString() ?? "Magnitude";
+                    }
+
                     for (int i = 0; i < 129; i++)
                     {
                         _psdFreqs[i] = payload.PsdFreqs[i];
                         double power = payload.PsdPowers[i];
-                        _psdPowers[i] = useLog ? 10 * Math.Log10(Math.Max(power, 1e-10)) : power;
+                        
+                        if (scaleMode == "Logarithmic")
+                            _psdPowers[i] = 10 * Math.Log10(Math.Max(power, 1e-10));
+                        else if (scaleMode == "Standard")
+                            _psdPowers[i] = Math.Sqrt(power); // Amplitude
+                        else
+                            _psdPowers[i] = power; // Magnitude
                     }
                 });
             }
