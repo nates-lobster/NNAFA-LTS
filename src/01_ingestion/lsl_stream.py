@@ -8,7 +8,7 @@ class EEGStream:
         
     def connect(self):
         print(f"Resolving {self.stream_name} stream...")
-        streams = pylsl.resolve_stream('type', 'EEG')
+        streams = pylsl.resolve_byprop('type', 'EEG')
         if not streams:
             raise RuntimeError("No EEG stream found. Ensure BlueMuse is running.")
         self.inlet = pylsl.StreamInlet(streams[0], max_chunklen=self.chunk_size)
