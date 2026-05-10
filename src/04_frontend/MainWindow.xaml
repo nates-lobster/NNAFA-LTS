@@ -5,8 +5,45 @@
         Title="NNAFA V0.2 LTS" Height="800" Width="1200"
         Background="#1E1E2E" Foreground="#CDD6F4"
         Loaded="Window_Loaded" Closing="Window_Closing">
-    <Grid>
-        <TabControl Background="#1E1E2E" BorderThickness="0" Margin="10">
+    <Grid Background="#1E1E2E">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Persistent Top Bar -->
+        <Border Grid.Row="0" Background="#313244" Padding="15" Margin="0,0,0,5">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <!-- Integrity -->
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="Signal Status: " FontSize="18" FontWeight="Bold" Foreground="#CDD6F4"/>
+                    <TextBlock x:Name="TxtStatus" Text="WAITING" FontSize="18" FontWeight="Bold" Foreground="Gray" Margin="5,0"/>
+                    <Ellipse x:Name="IntegrityLight" Width="20" Height="20" Fill="Gray" Margin="10,0"/>
+                </StackPanel>
+                
+                <!-- Power Levels -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="δ (1-4Hz): " Foreground="#CDD6F4" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="TxtDelta" Text="0.0" Width="40" Foreground="#A6ADC8" Margin="0,0,10,0" FontWeight="Bold"/>
+                    <TextBlock Text="θ (4-8Hz): " Foreground="#CDD6F4" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="TxtTheta" Text="0.0" Width="40" Foreground="#A6ADC8" Margin="0,0,10,0" FontWeight="Bold"/>
+                    <TextBlock Text="α (8-12Hz): " Foreground="#CDD6F4" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="TxtAlpha" Text="0.0" Width="40" Foreground="#A6ADC8" Margin="0,0,10,0" FontWeight="Bold"/>
+                    <TextBlock Text="β (12-30Hz): " Foreground="#CDD6F4" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="TxtBeta" Text="0.0" Width="40" Foreground="#A6ADC8" Margin="0,0,10,0" FontWeight="Bold"/>
+                    <TextBlock Text="γ (30-40Hz): " Foreground="#CDD6F4" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="TxtGamma" Text="0.0" Width="40" Foreground="#A6ADC8" FontWeight="Bold"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <TabControl Grid.Row="1" Background="#1E1E2E" BorderThickness="0" Margin="10">
             <TabControl.Resources>
                 <Style TargetType="TabItem">
                     <Setter Property="Template">
@@ -38,24 +75,18 @@
             <TabItem Header="Monitoring">
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="2*"/>
                         <RowDefinition Height="1*"/>
                     </Grid.RowDefinitions>
                     
-                    <StackPanel Orientation="Horizontal" Margin="0,10" HorizontalAlignment="Center">
-                        <TextBlock Text="Signal Integrity: " VerticalAlignment="Center" FontSize="18" FontWeight="Bold"/>
-                        <Ellipse x:Name="IntegrityLight" Width="20" Height="20" Fill="Gray" Margin="10,0"/>
-                    </StackPanel>
-                    
-                    <UniformGrid Rows="2" Columns="2" Grid.Row="1" Margin="10">
-                        <ScottPlot:WpfPlot x:Name="WpfPlotTP9" Margin="5"/>
+                    <UniformGrid Rows="2" Columns="2" Grid.Row="0" Margin="10">
                         <ScottPlot:WpfPlot x:Name="WpfPlotAF7" Margin="5"/>
                         <ScottPlot:WpfPlot x:Name="WpfPlotAF8" Margin="5"/>
+                        <ScottPlot:WpfPlot x:Name="WpfPlotTP9" Margin="5"/>
                         <ScottPlot:WpfPlot x:Name="WpfPlotTP10" Margin="5"/>
                     </UniformGrid>
                     
-                    <Grid Grid.Row="2" Margin="15,5">
+                    <Grid Grid.Row="1" Margin="15,5">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="*"/>

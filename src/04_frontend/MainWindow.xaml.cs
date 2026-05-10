@@ -39,9 +39,9 @@ namespace Frontend
 
         private void SetupPlots()
         {
-            var plots = new[] { WpfPlotTP9, WpfPlotAF7, WpfPlotAF8, WpfPlotTP10 };
-            var titles = new[] { "TP9", "AF7", "AF8", "TP10" };
-            var dataArrays = new[] { _tp9Data, _af7Data, _af8Data, _tp10Data };
+            var plots = new[] { WpfPlotAF7, WpfPlotAF8, WpfPlotTP9, WpfPlotTP10 };
+            var titles = new[] { "AF7 (Left Forehead)", "AF8 (Right Forehead)", "TP9 (Left Ear)", "TP10 (Right Ear)" };
+            var dataArrays = new[] { _af7Data, _af8Data, _tp9Data, _tp10Data };
 
             for (int i = 0; i < plots.Length; i++)
             {
@@ -74,6 +74,7 @@ namespace Frontend
             plot.Plot.Add.HorizontalSpan(8, 12, new Color(0, 128, 0, alpha));    // Alpha - Green
             plot.Plot.Add.HorizontalSpan(12, 30, new Color(0, 0, 128, alpha));   // Beta - Blue
             plot.Plot.Add.HorizontalSpan(30, 40, new Color(128, 128, 0, alpha)); // Gamma - Yellow
+            plot.Plot.Add.HorizontalSpan(40, 100, new Color(255, 69, 0, alpha)); // High Gamma - Orange-Red
             
             var scatter = plot.Plot.Add.Scatter(_psdFreqs, _psdPowers);
             scatter.Color = Color.FromHex("#89B4FA");
@@ -154,6 +155,9 @@ namespace Frontend
             Dispatcher.InvokeAsync(() =>
             {
                 if (!IsLoaded) return;
+                
+                string statusText = payload.Metrics.SignalIntegrity.ToString().ToUpper();
+                TxtStatus.Text = statusText;
 
                 IntegrityLight.Fill = payload.Metrics.SignalIntegrity switch
                 {
@@ -162,6 +166,14 @@ namespace Frontend
                     SignalIntegrity.Red => Brushes.Red,
                     _ => Brushes.Gray
                 };
+                
+                TxtStatus.Foreground = IntegrityLight.Fill;
+
+                TxtDelta.Text = payload.BandPower.Delta.ToString("F1");
+                TxtTheta.Text = payload.BandPower.Theta.ToString("F1");
+                TxtAlpha.Text = payload.BandPower.Alpha.ToString("F1");
+                TxtBeta.Text = payload.BandPower.Beta.ToString("F1");
+                TxtGamma.Text = payload.BandPower.Gamma.ToString("F1");
 
                 AlphaRatioText.Text = payload.Metrics.AlphaRatio.ToString("F2");
                 AlphaRatioBar.Value = payload.Metrics.AlphaRatio;
