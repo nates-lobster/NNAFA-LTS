@@ -68,11 +68,11 @@ namespace Frontend
             plot.Plot.Axes.SetLimitsX(0, 45);
             
             // Background Shading for Brainwaves
-            plot.Plot.Add.VerticalSpan(1, 4, Color.FromHex("#33444444")); // Delta
-            plot.Plot.Add.VerticalSpan(4, 8, Color.FromHex("#33880088")); // Theta
-            plot.Plot.Add.VerticalSpan(8, 13, Color.FromHex("#33008800")); // Alpha
-            plot.Plot.Add.VerticalSpan(13, 30, Color.FromHex("#33000088")); // Beta
-            plot.Plot.Add.VerticalSpan(30, 40, Color.FromHex("#33888800")); // Gamma
+            plot.Plot.Add.VerticalSpan(1, 4, Color.FromHex("#22444444")); // Delta
+            plot.Plot.Add.VerticalSpan(4, 8, Color.FromHex("#22880088")); // Theta
+            plot.Plot.Add.VerticalSpan(8, 12, Color.FromHex("#22008800")); // Alpha
+            plot.Plot.Add.VerticalSpan(12, 30, Color.FromHex("#22000088")); // Beta
+            plot.Plot.Add.VerticalSpan(30, 40, Color.FromHex("#22888800")); // Gamma
             
             var scatter = plot.Plot.Add.Scatter(_psdFreqs, _psdPowers);
             scatter.Color = Color.FromHex("#89B4FA");
