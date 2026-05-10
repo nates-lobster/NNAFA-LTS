@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package nnafa.telemetry.v1;
+
+// Define C# namespace for generated code
+option csharp_namespace = "Nnafa.Telemetry.V1";
+
+message TelemetryPayload {
+  // High-precision LSL timestamp in milliseconds
+  double timestamp_ms = 1;
+  
+  Channels channels = 2;
+  BandPower band_power = 3;
+  Metrics metrics = 4;
+}
+
+message Channels {
+  double tp9 = 1;
+  double af7 = 2;
+  double af8 = 3;
+  double tp10 = 4;
+}
+
+message BandPower {
+  double delta = 1;
+  double theta = 2;
+  double alpha = 3;
+  double beta = 4;
+  double gamma = 5;
+}
+
+enum SignalIntegrity {
+  UNKNOWN = 0;
+  GREEN = 1;
+  YELLOW = 2;
+  RED = 3;
+}
+
+message Metrics {
+  double alpha_ratio = 1;
+  SignalIntegrity signal_integrity = 2;
+}

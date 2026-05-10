@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package nnafa.state.v1;
+
+// Define C# namespace for generated code
+option csharp_namespace = "Nnafa.State.V1";
+
+enum SystemState {
+  STATE_UNKNOWN = 0;
+  STATE_INIT = 1;
+  STATE_CALIBRATING = 2;
+  STATE_BASELINING = 3;
+  STATE_TRAINING_RELAXATION = 4;
+  STATE_TRAINING_FOCUS = 5;
+  STATE_STOPPED = 6;
+}
+
+message StateTransition {
+  double timestamp_ms = 1;
+  SystemState previous_state = 2;
+  SystemState current_state = 3;
+  string reason = 4;
+}

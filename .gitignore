@@ -1,0 +1,14 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+
+# C# / .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+*.log
