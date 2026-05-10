@@ -18,7 +18,7 @@ def test_dsp_pipeline():
     filtered = dsp.apply_filters(data)
     assert filtered.shape == (512, 4)
     
-    powers = dsp.compute_band_powers(filtered)
+    powers, freqs, psd_avg = dsp.compute_band_powers(filtered)
     assert 'alpha' in powers
     assert 'beta' in powers
     assert powers['alpha'] > powers['beta']

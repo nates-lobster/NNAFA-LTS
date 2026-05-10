@@ -24,6 +24,7 @@ def compute_band_powers(filtered_data):
     Extracts band powers using Welch's method and np.trapezoid.
     """
     freqs, psd = welch(filtered_data, fs=FS, nperseg=256, axis=0)
+    psd_avg = np.mean(psd, axis=1)
     
     bands = {
         'delta': (1, 4),
@@ -39,7 +40,7 @@ def compute_band_powers(filtered_data):
         band_power = np.trapezoid(psd[idx], freqs[idx], axis=0)
         powers[band] = np.mean(band_power) # Average across 4 channels
         
-    return powers
+    return powers, freqs, psd_avg
 
 def calculate_metrics(powers, raw_data):
     """

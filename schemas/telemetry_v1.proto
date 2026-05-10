@@ -12,6 +12,8 @@ message TelemetryPayload {
   Channels channels = 2;
   BandPower band_power = 3;
   Metrics metrics = 4;
+  repeated double psd_freqs = 5;
+  repeated double psd_powers = 6;
 }
 
 message Channels {

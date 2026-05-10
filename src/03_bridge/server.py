@@ -28,7 +28,7 @@ async def eeg_loop(websocket):
                 if data is not None:
                     # Pure DSP
                     filtered = dsp.apply_filters(data)
-                    powers = dsp.compute_band_powers(filtered)
+                    powers, freqs, psd_avg = dsp.compute_band_powers(filtered)
                     metrics = dsp.calculate_metrics(powers, data)
                     
                     # Create Protobuf Payload
@@ -47,6 +47,9 @@ async def eeg_loop(websocket):
                     payload.band_power.alpha = powers['alpha']
                     payload.band_power.beta = powers['beta']
                     payload.band_power.gamma = powers['gamma']
+                    
+                    payload.psd_freqs.extend(freqs.tolist())
+                    payload.psd_powers.extend(psd_avg.tolist())
                     
                     payload.metrics.alpha_ratio = metrics['alpha_ratio']
                     if metrics['signal_integrity'] == "GREEN":

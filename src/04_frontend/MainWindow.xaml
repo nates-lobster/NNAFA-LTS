@@ -39,31 +39,41 @@
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="2*"/>
+                        <RowDefinition Height="1*"/>
                     </Grid.RowDefinitions>
                     
                     <StackPanel Orientation="Horizontal" Margin="0,10" HorizontalAlignment="Center">
                         <TextBlock Text="Signal Integrity: " VerticalAlignment="Center" FontSize="18" FontWeight="Bold"/>
                         <Ellipse x:Name="IntegrityLight" Width="20" Height="20" Fill="Gray" Margin="10,0"/>
+                        <ToggleButton x:Name="PsdScaleToggle" Content="Logarithmic Scale" Margin="20,0,0,0" Padding="5"/>
                     </StackPanel>
                     
-                    <UniformGrid Rows="4" Columns="1" Grid.Row="1" Margin="10">
+                    <UniformGrid Rows="2" Columns="2" Grid.Row="1" Margin="10">
                         <ScottPlot:WpfPlot x:Name="WpfPlotTP9" Margin="5"/>
                         <ScottPlot:WpfPlot x:Name="WpfPlotAF7" Margin="5"/>
                         <ScottPlot:WpfPlot x:Name="WpfPlotAF8" Margin="5"/>
                         <ScottPlot:WpfPlot x:Name="WpfPlotTP10" Margin="5"/>
                     </UniformGrid>
+                    
+                    <ScottPlot:WpfPlot x:Name="WpfPlotPSD_Monitor" Grid.Row="2" Margin="15,5"/>
                 </Grid>
             </TabItem>
 
             <!-- Neurofeedback Tab -->
             <TabItem Header="Neurofeedback">
                 <Grid>
-                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,20,0,0" Grid.Row="0">
                         <TextBlock Text="Live Alpha/Beta Ratio" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,20"/>
                         <TextBlock x:Name="AlphaRatioText" Text="0.00" FontSize="72" FontWeight="Black" Foreground="#A6E3A1" HorizontalAlignment="Center"/>
                         <ProgressBar x:Name="AlphaRatioBar" Width="400" Height="30" Minimum="0" Maximum="3" Value="0" Margin="0,20" Foreground="#A6E3A1" Background="#313244"/>
                     </StackPanel>
+                    
+                    <ScottPlot:WpfPlot x:Name="WpfPlotPSD_NFB" Grid.Row="1" Margin="20"/>
                 </Grid>
             </TabItem>
 
