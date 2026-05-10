@@ -9,7 +9,7 @@ This document tracks the re-implementation of V0.1 features in the strict archit
 - [x] Initialize C# WPF Frontend (.NET 10.0)
 - [x] Initialize Git Repository and link to GitHub (NNAFA-LTS)
 
-## Milestone 2: Python Backend (The Worker)
+## Milestone 2: Python Backend
 - [x] Port LSL Ingestion (256Hz, 4 Channels) to `src/01_ingestion/`
 - [x] Port DSP Pipeline (60Hz Notch, 1-40Hz Bandpass, 2s Ring Buffer, `scipy.signal.welch`) to `src/02_processing/`
 - [x] Port `np.trapezoid` Band Power Extraction to `src/02_processing/`
@@ -17,7 +17,7 @@ This document tracks the re-implementation of V0.1 features in the strict archit
 - [x] Port audio engine (Rain/Bird chirps) based on Pygame mixer (stubbed)
 - [x] Fix: "Orphaned Python process" issue during shutdown
 
-## Milestone 3: C# Frontend (The General)
+## Milestone 3: C# Frontend
 - [x] Subscribe to WebSocket telemetry (Port 8765)
 - [x] Implement `SemaphoreSlim` for threading safe operations
 - [x] Rebuild "Monitoring" Tab (Raw EEG + Integrity Lights R/Y/G)

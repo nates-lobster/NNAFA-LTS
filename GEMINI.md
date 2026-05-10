@@ -10,8 +10,8 @@
 **DOCUMENTATION RULE:** Upon request, find `../Documentation/` and create a subfolder for the current day formatted as `MM-DD`. Inside, create/edit `CLI.md` summarizing the session's work.
 
 ## 1. System Architecture
-* **Frontend (src/04_frontend/):** C# WPF (.NET 10.0) - "The General". Primary UI and participant management.
-* **Backend (src/01-03/):** Python 3.11+ - "The Worker". Modularized: Ingestion, Processing, Bridge.
+* **Frontend (src/04_frontend/):** C# WPF (.NET 10.0). Primary UI and participant management.
+* **Backend (src/01-03/):** Python 3.11+. Modularized: Ingestion, Processing, Bridge.
 * **IPC Bridge:** WebSockets / **Protobuf** (Port 8765). Python broadcasts telemetry; C# subscribes.
 * **Hardware:** Muse 2/S Headset via BlueMuse (LSL).
 
