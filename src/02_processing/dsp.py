@@ -5,7 +5,7 @@ FS = 256.0
 
 def apply_filters(data):
     """
-    Applies a 60Hz notch and 1-40Hz bandpass filter.
+    Applies a 60Hz notch and 1-100Hz bandpass filter.
     data shape: (samples, channels)
     """
     nyq = 0.5 * FS
@@ -13,7 +13,7 @@ def apply_filters(data):
     notched = lfilter(b_notch, a_notch, data, axis=0)
     
     low = 1.0 / nyq
-    high = 40.0 / nyq
+    high = 100.0 / nyq
     b_band, a_band = butter(4, [low, high], btype='band')
     filtered = lfilter(b_band, a_band, notched, axis=0)
     
