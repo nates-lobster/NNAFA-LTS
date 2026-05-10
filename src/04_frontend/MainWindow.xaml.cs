@@ -25,8 +25,8 @@ namespace Frontend
         private int _dataIndex = 0;
         
         // Data buffers for PSD
-        private readonly double[] _psdFreqs = new double[129];
-        private readonly double[] _psdPowers = new double[129];
+        private readonly double[] _psdFreqs = new double[101];
+        private readonly double[] _psdPowers = new double[101];
 
         public MainWindow()
         {
@@ -65,7 +65,7 @@ namespace Frontend
             plot.Plot.Title("Power Spectral Density");
             plot.Plot.XLabel("Frequency (Hz)");
             plot.Plot.YLabel("Power");
-            plot.Plot.Axes.SetLimitsX(0, 45);
+            plot.Plot.Axes.SetLimits(0, 100, 0, 100); // Default Magnitude limits
             
             // Background Shading for Brainwaves using reliable RGBA byte constructor (R, G, B, A)
             byte alpha = 60; // Semi-transparent
@@ -103,10 +103,7 @@ namespace Frontend
                             WpfPlotAF8.Refresh();
                             WpfPlotTP10.Refresh();
                             
-                            WpfPlotPSD_Monitor.Plot.Axes.AutoScaleY();
                             WpfPlotPSD_Monitor.Refresh();
-                            
-                            WpfPlotPSD_NFB.Plot.Axes.AutoScaleY();
                             WpfPlotPSD_NFB.Refresh();
                         });
                     }
@@ -125,7 +122,7 @@ namespace Frontend
             _dataIndex = (_dataIndex + 1) % 512;
             
             // Update PSD Data
-            if (payload.PsdFreqs.Count == 129 && payload.PsdPowers.Count == 129)
+            if (payload.PsdFreqs.Count == 101 && payload.PsdPowers.Count == 101)
             {
                 Dispatcher.Invoke(() => 
                 {
@@ -139,7 +136,7 @@ namespace Frontend
                         scaleMode = "Standard";
                     }
 
-                    for (int i = 0; i < 129; i++)
+                    for (int i = 0; i < 101; i++)
                     {
                         _psdFreqs[i] = payload.PsdFreqs[i];
                         double power = payload.PsdPowers[i];
@@ -169,6 +166,42 @@ namespace Frontend
                 AlphaRatioText.Text = payload.Metrics.AlphaRatio.ToString("F2");
                 AlphaRatioBar.Value = payload.Metrics.AlphaRatio;
             });
+        }
+
+        private void RbScale_Checked(object sender, RoutedEventArgs e)
+        {
+            if (!IsLoaded) return;
+            ApplyStandardPsdLimits();
+        }
+        
+        private void ApplyStandardPsdLimits()
+        {
+            double maxY = 100;
+            double minY = 0;
+            if (RbLogarithmic.IsChecked == true)
+            {
+                minY = -15;
+                maxY = 30;
+            }
+            else if (RbStandard.IsChecked == true)
+            {
+                maxY = 20;
+            }
+            
+            WpfPlotPSD_Monitor.Plot.Axes.SetLimits(0, 100, minY, maxY);
+            WpfPlotPSD_NFB.Plot.Axes.SetLimits(0, 100, minY, maxY);
+            
+            WpfPlotPSD_Monitor.Refresh();
+            WpfPlotPSD_NFB.Refresh();
+        }
+
+        private void WpfPlotPSD_PreviewMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == System.Windows.Input.MouseButton.Middle)
+            {
+                e.Handled = true; // Prevent ScottPlot default AutoScale
+                ApplyStandardPsdLimits();
+            }
         }
 
         private void KillPython_Click(object sender, RoutedEventArgs e)

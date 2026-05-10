@@ -48,8 +48,9 @@ async def eeg_loop(websocket):
                     payload.band_power.beta = powers['beta']
                     payload.band_power.gamma = powers['gamma']
                     
-                    payload.psd_freqs.extend(freqs.tolist())
-                    payload.psd_powers.extend(psd_avg.tolist())
+                    freq_limit_idx = freqs <= 100
+                    payload.psd_freqs.extend(freqs[freq_limit_idx].tolist())
+                    payload.psd_powers.extend(psd_avg[freq_limit_idx].tolist())
                     
                     payload.metrics.alpha_ratio = metrics['alpha_ratio']
                     if metrics['signal_integrity'] == "GREEN":
