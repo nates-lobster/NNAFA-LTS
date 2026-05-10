@@ -1,32 +1,36 @@
-# Project Context: NeuroMemoryStudy (EEG Research)
+# Project Context: NNAFA-LTS (NeuroAnalysis & Feedback App)
 
 **CRITICAL STARTUP RULE:** Always read [MEMORY.md](./MEMORY.md) at the start of every chat to load Long-Term and Short-Term persistent project facts.
 
-**DOCUMENTATION RULE:** Upon request, find `../Documentation/` and create a subfolder for the current day formatted as `MM-DD` (no leading zeroes, e.g., `4-30`). Inside, create/edit `CLI.md` summarizing the session's work, including progress, bugs encountered, how they were solved, and detailed technical implementation notes suitable for a science fair logbook.
+**AGENT ORCHESTRATION:**
+- **Before IMPLEMENTING:** Read [coder.md](./agents/coder.md)
+- **Before FIXING:** Read [debugger.md](./agents/debugger.md)
+- **Before COMMITTING/WRAPPING:** Read [auditor.md](./agents/auditor.md)
+
+**DOCUMENTATION RULE:** Upon request, find `../Documentation/` and create a subfolder for the current day formatted as `MM-DD`. Inside, create/edit `CLI.md` summarizing the session's work.
 
 ## 1. System Architecture
-* **Frontend (App/):** C# WPF (.NET 10.0) - "The General". Primary UI and participant management.
-* **Backend (PyApp/):** Python 3.11+ - "The Worker". Handles LSL stream, DSP, and audio triggers.
-* **IPC Bridge:** WebSockets/JSON (Port 8765). Python broadcasts telemetry; C# subscribes.
-* **Hardware:** Muse 2/S Headset via BlueMuse (LSL)[cite: 1, 2].
+* **Frontend (src/04_frontend/):** C# WPF (.NET 10.0) - "The General". Primary UI and participant management.
+* **Backend (src/01-03/):** Python 3.11+ - "The Worker". Modularized: Ingestion, Processing, Bridge.
+* **IPC Bridge:** WebSockets / **Protobuf** (Port 8765). Python broadcasts telemetry; C# subscribes.
+* **Hardware:** Muse 2/S Headset via BlueMuse (LSL).
 
-## 2. Technical Constraints (CRITICAL)
-* **Sampling Rate:** 256Hz (Hardware Standard)[cite: 2].
-* **Filtering:** MUST apply 60Hz Notch and 1Hz–40Hz Bandpass to raw data before FFT[cite: 1, 2].
-* **FFT Method:** `scipy.signal.welch` using a 2-second rolling ring buffer[cite: 2].
-* **Artifact Rejection:** Peak-to-peak amplitude gating (>100uV) specifically on AF7/AF8.
+## 2. Technical Constraints (STRICT V0.2)
+* **Sampling Rate:** 256Hz.
+* **Filtering:** 60Hz Notch and 1Hz–40Hz Bandpass applied in `src/02_processing/`.
+* **FFT Method:** `scipy.signal.welch` (2-second rolling ring buffer).
+* **Artifact Rejection:** Peak-to-peak amplitude gating (>100uV) on AF7/AF8.
 * **C# Conventions:** <Nullable>enable</Nullable> and <ImplicitUsings>enable</ImplicitUsings>.
+* **Python Conventions:** Use `np.trapezoid` (NumPy 2.x) for band power.
 
-## 3. Core Modules (Reference: Structure Tree.docx)
-1. **Data Acquisition:** pylsl Stream Listener -> 2s Ring Buffer -> Preprocessing[cite: 2].
-2. **Signal Engine:** FFT -> Band Power Extractor -> Ratio Logic (e.g., Alpha/Beta)[cite: 1, 2].
-3. **Audio Engine:** `pygame.mixer`. Rain volume = 1.0 - SuccessRatio. Reward = Bird chirps[cite: 1, 2].
-4. **UI Tabs:** 
-    - **Monitoring:** Raw EEG (4 channels) + Signal Integrity Lights (R/Y/G)[cite: 1, 2].
-    - **Neurofeedback:** Calibration (60s baseline) + Protocol Selector[cite: 1, 2].
-    - **Research:** Participant Metadata + LabRecorder TCP Control (Port 22345)[cite: 1, 2].
+## 3. Core Modules
+1. **01_ingestion:** pylsl Stream Listener -> 2s Ring Buffer.
+2. **02_processing:** Stateless DSP (FFT -> Band Power -> Ratio Logic).
+3. **03_bridge:** WebSocket Server / Protobuf Serialization.
+4. **04_frontend:** Visualization (Raw EEG + Integrity Lights + NFB Dashboard).
 
 ## 4. Operational Commands
-* **Build C#:** `dotnet build App/App.csproj`.
-* **Run C#:** `dotnet run --project App/App.csproj`.
-* **Run Python:** `python PyApp/engine.py`.
+* **Build C#:** `dotnet build src/04_frontend/Frontend.csproj`.
+* **Run App (Full Stack):** `.\run_v0.2.bat`.
+* **Run Backend Only:** `python src/03_bridge/server.py`.
+* **Git Sync:** `git push origin main`.
