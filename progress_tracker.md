@@ -10,12 +10,12 @@ This document tracks the re-implementation of V0.1 features in the strict archit
 - [x] Initialize Git Repository and link to GitHub (NNAFA-LTS)
 
 ## Milestone 2: Python Backend (The Worker)
-- [ ] Port LSL Ingestion (256Hz, 4 Channels) to `src/01_ingestion/`
-- [ ] Port DSP Pipeline (60Hz Notch, 1-40Hz Bandpass, 2s Ring Buffer, `scipy.signal.welch`) to `src/02_processing/`
-- [ ] Port `np.trapezoid` Band Power Extraction to `src/02_processing/`
-- [ ] Set up WebSocket Server (Port 8765) in `src/03_bridge/` matching Schema
-- [ ] Port audio engine (Rain/Bird chirps) based on Pygame mixer
-- [ ] Fix: "Orphaned Python process" issue during shutdown
+- [x] Port LSL Ingestion (256Hz, 4 Channels) to `src/01_ingestion/`
+- [x] Port DSP Pipeline (60Hz Notch, 1-40Hz Bandpass, 2s Ring Buffer, `scipy.signal.welch`) to `src/02_processing/`
+- [x] Port `np.trapezoid` Band Power Extraction to `src/02_processing/`
+- [x] Set up WebSocket Server (Port 8765) in `src/03_bridge/` matching Schema
+- [x] Port audio engine (Rain/Bird chirps) based on Pygame mixer (stubbed)
+- [x] Fix: "Orphaned Python process" issue during shutdown
 
 ## Milestone 3: C# Frontend (The General)
 - [ ] Subscribe to WebSocket telemetry (Port 8765)
