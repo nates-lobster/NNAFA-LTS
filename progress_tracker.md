@@ -18,11 +18,11 @@ This document tracks the re-implementation of V0.1 features in the strict archit
 - [x] Fix: "Orphaned Python process" issue during shutdown
 
 ## Milestone 3: C# Frontend (The General)
-- [ ] Subscribe to WebSocket telemetry (Port 8765)
-- [ ] Implement `SemaphoreSlim` for threading safe operations
-- [ ] Rebuild "Monitoring" Tab (Raw EEG + Integrity Lights R/Y/G)
-- [ ] Rebuild "Neurofeedback" Tab (Live Alpha/Beta ratio indicator)
-- [ ] Rebuild "Research" Tab (Participant Metadata + LabRecorder TCP Control Port 22345)
-- [ ] Add "Kill All Python" Button
-- [ ] Fix: "Disappearing plot" issue by locking axes to -150/+150 uV
-- [ ] Fix: Startup crashes by using `IsLoaded` checks
+- [x] Subscribe to WebSocket telemetry (Port 8765)
+- [x] Implement `SemaphoreSlim` for threading safe operations
+- [x] Rebuild "Monitoring" Tab (Raw EEG + Integrity Lights R/Y/G)
+- [x] Rebuild "Neurofeedback" Tab (Live Alpha/Beta ratio indicator)
+- [x] Rebuild "Research" Tab (Participant Metadata + LabRecorder TCP Control Port 22345)
+- [x] Add "Kill All Python" Button
+- [x] Fix: "Disappearing plot" issue by locking axes to -150/+150 uV
+- [x] Fix: Startup crashes by using `IsLoaded` checks
