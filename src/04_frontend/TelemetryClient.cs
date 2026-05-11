@@ -30,15 +30,23 @@ namespace Frontend
 
         private async Task ReceiveLoopAsync(CancellationToken ct)
         {
-            var buffer = new byte[4096];
+            var buffer = new byte[65536]; // Increased to 64KB
             while (_client.State == WebSocketState.Open && !ct.IsCancellationRequested)
             {
                 try
                 {
-                    var result = await _client.ReceiveAsync(new ArraySegment<byte>(buffer), ct);
-                    if (result.MessageType == WebSocketMessageType.Binary)
+                    using var ms = new System.IO.MemoryStream();
+                    WebSocketReceiveResult result;
+                    do
                     {
-                        var payload = TelemetryPayload.Parser.ParseFrom(buffer, 0, result.Count);
+                        result = await _client.ReceiveAsync(new ArraySegment<byte>(buffer), ct);
+                        if (result.MessageType == WebSocketMessageType.Close) break;
+                        ms.Write(buffer, 0, result.Count);
+                    } while (!result.EndOfMessage);
+
+                    if (result.MessageType == WebSocketMessageType.Binary && ms.Length > 0)
+                    {
+                        var payload = TelemetryPayload.Parser.ParseFrom(ms.ToArray());
                         
                         await _semaphore.WaitAsync(ct);
                         try
