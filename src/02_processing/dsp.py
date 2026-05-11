@@ -3,9 +3,9 @@ from scipy.signal import welch, iirnotch, butter, lfilter, firwin
 
 FS = 256.0
 
-# Pre-calculate FIR coefficients (129 taps for 1-100Hz bandpass)
+# Pre-calculate FIR coefficients (129 taps for 1-40Hz bandpass)
 TAPS = 129
-fir_coeffs = firwin(TAPS, [1.0, 100.0], pass_zero=False, fs=FS)
+fir_coeffs = firwin(TAPS, [1.0, 40.0], pass_zero=False, fs=FS)
 
 def apply_filters(data, mode="BOTH"):
     """
@@ -24,7 +24,7 @@ def apply_filters(data, mode="BOTH"):
     # IIR Stage
     if mode in ["BOTH", "ONLY_IIR"]:
         low = 1.0 / nyq
-        high = 100.0 / nyq
+        high = 40.0 / nyq
         b_band, a_band = butter(4, [low, high], btype='band')
         bandpassed = lfilter(b_band, a_band, fir_denoised, axis=0)
     else:
@@ -64,15 +64,16 @@ def calculate_metrics(powers, raw_data, notched_data):
     beta = powers.get('beta', 0)
     alpha_ratio = alpha / beta if beta > 0 else 0
     
-    # Check only the last 0.25 seconds (64 samples at 256Hz)
+    
+    # Check only the last 0.25 seconds across ALL sensors
     window = 64
-    af7 = notched_data[-window:, 1]
-    af8 = notched_data[-window:, 2]
+    max_p2p = 0
+    for ch in range(4):
+        p2p = np.max(notched_data[-window:, ch]) - np.min(notched_data[-window:, ch])
+        if p2p > max_p2p:
+            max_p2p = p2p
     
-    p2p_af7 = np.max(af7) - np.min(af7)
-    p2p_af8 = np.max(af8) - np.min(af8)
-    
-    if p2p_af7 > 150 or p2p_af8 > 150:
+    if max_p2p > 150:
         integrity = "RED"
     else:
         integrity = "GREEN"
