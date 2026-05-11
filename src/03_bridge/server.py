@@ -17,7 +17,7 @@ from collections import deque
 
 # Global settings and state
 CURRENT_MODE = "BOTH"
-RATIO_HISTORY = deque(maxlen=100) # 5s @ 20Hz
+RATIO_HISTORY = deque(maxlen=20) # 1s @ 20Hz
 CALIBRATION_BUFFER = []
 TARGET_RATIO = 1.0
 CALIBRATION_TOTAL_SAMPLES = 600 # 30s @ 20Hz

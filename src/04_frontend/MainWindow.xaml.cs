@@ -275,7 +275,13 @@ namespace Frontend
                 double ratio = payload.SmoothedAlphaRatio;
                 AlphaRatioText.Text = ratio.ToString("F2");
                 AlphaRatioBar.Value = ratio;
-                TargetRatioText.Text = $"Target: {payload.TargetRatio:F2}";
+
+                // Manual Difficulty Adjustment
+                double difficultyOffset = SliderDifficulty.Value;
+                TxtDifficulty.Text = $"Offset: {(difficultyOffset >= 0 ? "+" : "")}{difficultyOffset:F2}";
+                double effectiveTarget = payload.TargetRatio + difficultyOffset;
+                
+                TargetRatioText.Text = $"Target: {effectiveTarget:F2}";
                 PbCalibration.Value = payload.CalibrationProgress * 100;
                 
                 if (payload.CalibrationProgress > 0 && payload.CalibrationProgress < 1)
@@ -292,14 +298,14 @@ namespace Frontend
                 // Audio Volume Logic
                 // If ratio >= target, volume = 0 (silent)
                 // If ratio < target, volume is proportional
-                if (ratio >= payload.TargetRatio)
+                if (ratio >= effectiveTarget)
                 {
                     _targetVolume = 0;
                 }
                 else
                 {
                     // Volume = Difference (clamped 0-1)
-                    _targetVolume = Math.Clamp(payload.TargetRatio - ratio, 0, 1);
+                    _targetVolume = Math.Clamp(effectiveTarget - ratio, 0, 1);
                 }
 
                 // Smooth volume "slope"

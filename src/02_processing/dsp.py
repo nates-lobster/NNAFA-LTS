@@ -70,7 +70,7 @@ def calculate_metrics(powers, raw_data):
     p2p_af7 = np.max(af7) - np.min(af7)
     p2p_af8 = np.max(af8) - np.min(af8)
     
-    if p2p_af7 > 100 or p2p_af8 > 100:
+    if p2p_af7 > 150 or p2p_af8 > 150:
         integrity = "RED"
     else:
         integrity = "GREEN"
