@@ -1,11 +1,15 @@
 import numpy as np
-from scipy.signal import welch, iirnotch, butter, lfilter
+from scipy.signal import welch, iirnotch, butter, lfilter, firwin
 
 FS = 256.0
 
+# Pre-calculate FIR coefficients (129 taps for 1-100Hz bandpass)
+TAPS = 129
+fir_coeffs = firwin(TAPS, [1.0, 100.0], pass_zero=False, fs=FS)
+
 def apply_filters(data):
     """
-    Applies a 60Hz notch and 1-100Hz bandpass filter.
+    Applies 60Hz notch, FIR Denoising (1-100Hz), and IIR Bandpass.
     data shape: (samples, channels)
     """
     nyq = 0.5 * FS
@@ -14,10 +18,15 @@ def apply_filters(data):
     
     low = 1.0 / nyq
     high = 100.0 / nyq
-    b_band, a_band = butter(4, [low, high], btype='band')
-    bandpassed = lfilter(b_band, a_band, notched, axis=0)
     
-    return notched, bandpassed
+    # FIR Denoising (Linear Phase)
+    fir_denoised = lfilter(fir_coeffs, 1.0, notched, axis=0)
+    
+    # IIR Bandpass (Butterworth)
+    b_band, a_band = butter(4, [low, high], btype='band')
+    bandpassed = lfilter(b_band, a_band, fir_denoised, axis=0)
+    
+    return notched, fir_denoised, bandpassed
 
 def compute_band_powers(filtered_data):
     """
@@ -40,7 +49,7 @@ def compute_band_powers(filtered_data):
         band_power = np.trapezoid(psd[idx], freqs[idx], axis=0)
         powers[band] = np.mean(band_power) # Average across 4 channels
         
-    return powers, freqs, psd_avg
+    return powers, freqs, psd_avg, psd
 
 def calculate_metrics(powers, raw_data):
     """

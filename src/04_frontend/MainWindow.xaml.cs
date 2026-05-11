@@ -39,7 +39,9 @@ namespace Frontend
         // Debug Buffers (512 samples)
         private readonly double[] _debugRawData = new double[512];
         private readonly double[] _debugNotchedData = new double[512];
+        private readonly double[] _debugFirData = new double[512];
         private readonly double[] _debugFilteredData = new double[512];
+        private readonly double[] _debugPsdPowers = new double[101];
         private int _debugDataIndex = 0;
 
         public MainWindow()
@@ -82,11 +84,11 @@ namespace Frontend
             WpfPlotHistory.Plot.XLabel("Time (30s Window)");
             WpfPlotHistory.Plot.YLabel("Power");
 
-            var d = WpfPlotHistory.Plot.Add.Signal(_historyDelta); d.Label = "Delta"; d.Color = Color.FromHex("#666666");
-            var t = WpfPlotHistory.Plot.Add.Signal(_historyTheta); t.Label = "Theta"; t.Color = Color.FromHex("#800080");
-            var a = WpfPlotHistory.Plot.Add.Signal(_historyAlpha); a.Label = "Alpha"; a.Color = Color.FromHex("#008000");
-            var b = WpfPlotHistory.Plot.Add.Signal(_historyBeta); b.Label = "Beta"; b.Color = Color.FromHex("#000080");
-            var g = WpfPlotHistory.Plot.Add.Signal(_historyGamma); g.Label = "Gamma"; g.Color = Color.FromHex("#808000");
+            var d = WpfPlotHistory.Plot.Add.Signal(_historyDelta); d.LegendText = "Delta"; d.Color = Color.FromHex("#666666");
+            var t = WpfPlotHistory.Plot.Add.Signal(_historyTheta); t.LegendText = "Theta"; t.Color = Color.FromHex("#800080");
+            var a = WpfPlotHistory.Plot.Add.Signal(_historyAlpha); a.LegendText = "Alpha"; a.Color = Color.FromHex("#008000");
+            var b = WpfPlotHistory.Plot.Add.Signal(_historyBeta); b.LegendText = "Beta"; b.Color = Color.FromHex("#000080");
+            var g = WpfPlotHistory.Plot.Add.Signal(_historyGamma); g.LegendText = "Gamma"; g.Color = Color.FromHex("#808000");
 
             WpfPlotHistory.Plot.ShowLegend(Alignment.UpperLeft);
             WpfPlotHistory.Plot.FigureBackground.Color = Color.FromHex("#1E1E2E");
@@ -98,9 +100,9 @@ namespace Frontend
 
         private void SetupDebugPlots()
         {
-            var debugPlots = new[] { WpfPlotDebugRaw, WpfPlotDebugNotched, WpfPlotDebugFiltered };
-            var titles = new[] { "1. Raw Signal", "2. Post-Notch (60Hz)", "3. Post-Bandpass (1-100Hz)" };
-            var arrays = new[] { _debugRawData, _debugNotchedData, _debugFilteredData };
+            var debugPlots = new[] { WpfPlotDebugRaw, WpfPlotDebugNotched, WpfPlotDebugFir, WpfPlotDebugFiltered };
+            var titles = new[] { "1. Raw Signal", "2. Post-Notch (60Hz)", "3. FIR Denoised", "4. Post-Bandpass (IIR)" };
+            var arrays = new[] { _debugRawData, _debugNotchedData, _debugFirData, _debugFilteredData };
 
             for (int i = 0; i < debugPlots.Length; i++)
             {
@@ -114,6 +116,11 @@ namespace Frontend
             }
 
             SetupPsdPlot(WpfPlotDebugPSD);
+            // Overwrite PSD data source for debug to use independent buffer
+            WpfPlotDebugPSD.Plot.Clear();
+            var scatter = WpfPlotDebugPSD.Plot.Add.Scatter(_psdFreqs, _debugPsdPowers);
+            scatter.Color = Color.FromHex("#89B4FA");
+            scatter.LineWidth = 2;
             WpfPlotDebugPSD.Plot.Title("4. Final PSD (after FFT)");
         }
 
@@ -166,6 +173,7 @@ namespace Frontend
                             WpfPlotHistory.Refresh();
                             WpfPlotDebugRaw.Refresh();
                             WpfPlotDebugNotched.Refresh();
+                            WpfPlotDebugFir.Refresh();
                             WpfPlotDebugFiltered.Refresh();
                             WpfPlotDebugPSD.Refresh();
                         });
@@ -244,21 +252,36 @@ namespace Frontend
                 _historyIndex = (_historyIndex + 1) % 600;
 
                 // Update Debug Buffers based on selected RadioButton
-                double raw = 0, notched = 0, filtered = 0;
-                if (RbDebugTP9.IsChecked == true) { raw = payload.RawChannels.Tp9; notched = payload.NotchedChannels.Tp9; filtered = payload.Channels.Tp9; }
-                else if (RbDebugAF7.IsChecked == true) { raw = payload.RawChannels.Af7; notched = payload.NotchedChannels.Af7; filtered = payload.Channels.Af7; }
-                else if (RbDebugAF8.IsChecked == true) { raw = payload.RawChannels.Af8; notched = payload.NotchedChannels.Af8; filtered = payload.Channels.Af8; }
-                else if (RbDebugTP10.IsChecked == true) { raw = payload.RawChannels.Tp10; notched = payload.NotchedChannels.Tp10; filtered = payload.Channels.Tp10; }
+                double raw = 0, notched = 0, fir = 0, filtered = 0;
+                if (RbDebugTP9.IsChecked == true) { raw = payload.RawChannels.Tp9; notched = payload.NotchedChannels.Tp9; fir = payload.FirChannels.Tp9; filtered = payload.Channels.Tp9; }
+                else if (RbDebugAF7.IsChecked == true) { raw = payload.RawChannels.Af7; notched = payload.NotchedChannels.Af7; fir = payload.FirChannels.Af7; filtered = payload.Channels.Af7; }
+                else if (RbDebugAF8.IsChecked == true) { raw = payload.RawChannels.Af8; notched = payload.NotchedChannels.Af8; fir = payload.FirChannels.Af8; filtered = payload.Channels.Af8; }
+                else if (RbDebugTP10.IsChecked == true) { raw = payload.RawChannels.Tp10; notched = payload.NotchedChannels.Tp10; fir = payload.FirChannels.Tp10; filtered = payload.Channels.Tp10; }
                 else if (RbDebugAvg.IsChecked == true)
                 {
                     raw = (payload.RawChannels.Tp9 + payload.RawChannels.Af7 + payload.RawChannels.Af8 + payload.RawChannels.Tp10) / 4.0;
                     notched = (payload.NotchedChannels.Tp9 + payload.NotchedChannels.Af7 + payload.NotchedChannels.Af8 + payload.NotchedChannels.Tp10) / 4.0;
+                    fir = (payload.FirChannels.Tp9 + payload.FirChannels.Af7 + payload.FirChannels.Af8 + payload.FirChannels.Tp10) / 4.0;
                     filtered = (payload.Channels.Tp9 + payload.Channels.Af7 + payload.Channels.Af8 + payload.Channels.Tp10) / 4.0;
                 }
 
                 _debugRawData[_debugDataIndex] = raw;
                 _debugNotchedData[_debugDataIndex] = notched;
+                _debugFirData[_debugDataIndex] = fir;
                 _debugFilteredData[_debugDataIndex] = filtered;
+                
+                // Update Debug PSD from selected channel
+                var psdSource = payload.PsdPowers;
+                if (RbDebugTP9.IsChecked == true) psdSource = payload.PsdTp9;
+                else if (RbDebugAF7.IsChecked == true) psdSource = payload.PsdAf7;
+                else if (RbDebugAF8.IsChecked == true) psdSource = payload.PsdAf8;
+                else if (RbDebugTP10.IsChecked == true) psdSource = payload.PsdTp10;
+
+                if (psdSource.Count == 101)
+                {
+                    for (int i = 0; i < 101; i++) _debugPsdPowers[i] = psdSource[i];
+                }
+
                 _debugDataIndex = (_debugDataIndex + 1) % 512;
             });
         }
@@ -293,6 +316,23 @@ namespace Frontend
                 e.Handled = true; // Prevent ScottPlot default AutoScale
                 ApplyStandardPsdLimits();
             }
+        }
+
+        private void RbDebug_Checked(object sender, RoutedEventArgs e)
+        {
+            if (!IsLoaded) return;
+            Array.Clear(_debugRawData, 0, 512);
+            Array.Clear(_debugNotchedData, 0, 512);
+            Array.Clear(_debugFirData, 0, 512);
+            Array.Clear(_debugFilteredData, 0, 512);
+            Array.Clear(_debugPsdPowers, 0, 101);
+            _debugDataIndex = 0;
+            
+            WpfPlotDebugRaw?.Refresh();
+            WpfPlotDebugNotched?.Refresh();
+            WpfPlotDebugFir?.Refresh();
+            WpfPlotDebugFiltered?.Refresh();
+            WpfPlotDebugPSD?.Refresh();
         }
 
         private void KillPython_Click(object sender, RoutedEventArgs e)

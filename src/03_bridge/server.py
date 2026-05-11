@@ -27,8 +27,8 @@ async def eeg_loop(websocket):
                 
                 if data is not None:
                     # Pure DSP
-                    notched, filtered = dsp.apply_filters(data)
-                    powers, freqs, psd_avg = dsp.compute_band_powers(filtered)
+                    notched, fir_denoised, filtered = dsp.apply_filters(data)
+                    powers, freqs, psd_avg, psd_all = dsp.compute_band_powers(filtered)
                     metrics = dsp.calculate_metrics(powers, data)
                     
                     # Create Protobuf Payload
@@ -53,6 +53,12 @@ async def eeg_loop(websocket):
                     payload.notched_channels.af8 = notched[-1, 2]
                     payload.notched_channels.tp10 = notched[-1, 3]
                     
+                    # Latest FIR sample
+                    payload.fir_channels.tp9 = fir_denoised[-1, 0]
+                    payload.fir_channels.af7 = fir_denoised[-1, 1]
+                    payload.fir_channels.af8 = fir_denoised[-1, 2]
+                    payload.fir_channels.tp10 = fir_denoised[-1, 3]
+                    
                     payload.band_power.delta = powers['delta']
                     payload.band_power.theta = powers['theta']
                     payload.band_power.alpha = powers['alpha']
@@ -62,6 +68,12 @@ async def eeg_loop(websocket):
                     freq_limit_idx = freqs <= 100
                     payload.psd_freqs.extend(freqs[freq_limit_idx].tolist())
                     payload.psd_powers.extend(psd_avg[freq_limit_idx].tolist())
+                    
+                    # Per-channel PSDs
+                    payload.psd_tp9.extend(psd_all[freq_limit_idx, 0].tolist())
+                    payload.psd_af7.extend(psd_all[freq_limit_idx, 1].tolist())
+                    payload.psd_af8.extend(psd_all[freq_limit_idx, 2].tolist())
+                    payload.psd_tp10.extend(psd_all[freq_limit_idx, 3].tolist())
                     
                     payload.metrics.alpha_ratio = metrics['alpha_ratio']
                     if metrics['signal_integrity'] == "GREEN":

@@ -16,6 +16,13 @@ message TelemetryPayload {
   repeated double psd_powers = 6;
   Channels raw_channels = 7;
   Channels notched_channels = 8;
+  
+  repeated double psd_tp9 = 9;
+  repeated double psd_af7 = 10;
+  repeated double psd_af8 = 11;
+  repeated double psd_tp10 = 12;
+  
+  Channels fir_channels = 13;
 }
 
 message Channels {

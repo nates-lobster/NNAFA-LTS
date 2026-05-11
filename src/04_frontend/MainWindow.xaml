@@ -140,16 +140,17 @@
                     
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
                         <TextBlock Text="Visualize Sensor: " VerticalAlignment="Center" FontSize="16" Margin="0,0,10,0" Foreground="#A6ADC8"/>
-                        <RadioButton x:Name="RbDebugTP9" Content="TP9" IsChecked="True" Foreground="#CDD6F4" Margin="0,0,10,0" VerticalAlignment="Center"/>
-                        <RadioButton x:Name="RbDebugAF7" Content="AF7" Foreground="#CDD6F4" Margin="0,0,10,0" VerticalAlignment="Center"/>
-                        <RadioButton x:Name="RbDebugAF8" Content="AF8" Foreground="#CDD6F4" Margin="0,0,10,0" VerticalAlignment="Center"/>
-                        <RadioButton x:Name="RbDebugTP10" Content="TP10" Foreground="#CDD6F4" Margin="0,0,10,0" VerticalAlignment="Center"/>
-                        <RadioButton x:Name="RbDebugAvg" Content="Average" Foreground="#CDD6F4" VerticalAlignment="Center"/>
+                        <RadioButton x:Name="RbDebugTP9" Content="TP9" IsChecked="True" Foreground="#CDD6F4" Margin="0,0,10,0" VerticalAlignment="Center" Checked="RbDebug_Checked"/>
+                        <RadioButton x:Name="RbDebugAF7" Content="AF7" Foreground="#CDD6F4" Margin="0,0,10,0" VerticalAlignment="Center" Checked="RbDebug_Checked"/>
+                        <RadioButton x:Name="RbDebugAF8" Content="AF8" Foreground="#CDD6F4" Margin="0,0,10,0" VerticalAlignment="Center" Checked="RbDebug_Checked"/>
+                        <RadioButton x:Name="RbDebugTP10" Content="TP10" Foreground="#CDD6F4" Margin="0,0,10,0" VerticalAlignment="Center" Checked="RbDebug_Checked"/>
+                        <RadioButton x:Name="RbDebugAvg" Content="Average" Foreground="#CDD6F4" VerticalAlignment="Center" Checked="RbDebug_Checked"/>
                     </StackPanel>
 
-                    <UniformGrid Grid.Row="1" Rows="2" Columns="2" Margin="10">
+                    <UniformGrid Grid.Row="1" Rows="3" Columns="2" Margin="10">
                         <ScottPlot:WpfPlot x:Name="WpfPlotDebugRaw" Margin="5"/>
                         <ScottPlot:WpfPlot x:Name="WpfPlotDebugNotched" Margin="5"/>
+                        <ScottPlot:WpfPlot x:Name="WpfPlotDebugFir" Margin="5"/>
                         <ScottPlot:WpfPlot x:Name="WpfPlotDebugFiltered" Margin="5"/>
                         <ScottPlot:WpfPlot x:Name="WpfPlotDebugPSD" Margin="5"/>
                     </UniformGrid>
