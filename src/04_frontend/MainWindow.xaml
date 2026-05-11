@@ -133,6 +133,12 @@
                                 <TextBlock Text="Manual Tuning (Difficulty)" Margin="0,15,0,5" FontSize="12" Foreground="#A6ADC8"/>
                                 <Slider x:Name="SliderDifficulty" Minimum="-0.5" Maximum="0.5" Value="0" TickFrequency="0.1" IsSnapToTickEnabled="True" Margin="0,0,0,5"/>
                                 <TextBlock x:Name="TxtDifficulty" Text="Offset: +0.00" HorizontalAlignment="Center" FontSize="10"/>
+
+                                <TextBlock Text="Smoothing Window (sec)" Margin="0,15,0,5" FontSize="12" Foreground="#A6ADC8"/>
+                                <Slider x:Name="SliderSmoothing" Minimum="0.5" Maximum="10.0" Value="1.0" TickFrequency="0.5" IsSnapToTickEnabled="True" Margin="0,0,0,5" ValueChanged="SliderSmoothing_ValueChanged"/>
+                                <TextBlock x:Name="TxtSmoothing" Text="Window: 1.0s" HorizontalAlignment="Center" FontSize="10"/>
+
+                                <Button x:Name="BtnRefresh" Content="Reset Session Buffers" Click="BtnRefresh_Click" Margin="0,15,0,0" Padding="5" Background="#45475A" Foreground="#CDD6F4"/>
                             </StackPanel>
                             
                             <StackPanel Grid.Column="1" Margin="10,0,0,0">

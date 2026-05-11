@@ -486,6 +486,29 @@ namespace Frontend
             }
         }
 
+        private async void SliderSmoothing_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (!IsLoaded) return;
+            TxtSmoothing.Text = $"Window: {SliderSmoothing.Value:F1}s";
+            
+            var request = new Nnafa.State.V1.StateRequest
+            {
+                Settings = new Nnafa.State.V1.SessionSettings { SmoothingWindowS = (float)SliderSmoothing.Value }
+            };
+            await _telemetryClient.SendAsync(request.ToByteArray(), _cts.Token);
+        }
+
+        private async void BtnRefresh_Click(object sender, RoutedEventArgs e)
+        {
+            if (!IsLoaded) return;
+            var request = new Nnafa.State.V1.StateRequest
+            {
+                Settings = new Nnafa.State.V1.SessionSettings { ResetBuffers = true }
+            };
+            await _telemetryClient.SendAsync(request.ToByteArray(), _cts.Token);
+            MessageBox.Show("Historical data cleared.", "Reset", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
         private async void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             _cts.Cancel();

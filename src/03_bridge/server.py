@@ -17,7 +17,8 @@ from collections import deque
 
 # Global settings and state
 CURRENT_MODE = "BOTH"
-RATIO_HISTORY = deque(maxlen=20) # 1s @ 20Hz
+RATIO_HISTORY = deque(maxlen=200) # Max 10s @ 20Hz
+CURRENT_SMOOTHING_S = 1.0
 CALIBRATION_BUFFER = []
 TARGET_RATIO = 1.0
 CALIBRATION_TOTAL_SAMPLES = 600 # 30s @ 20Hz
@@ -38,6 +39,17 @@ async def listen_for_commands(websocket):
             elif request.settings.filter_mode == state_v1_pb2.FILTER_ONLY_FIR:
                 CURRENT_MODE = "ONLY_FIR"
             
+            # Smoothing
+            if request.settings.smoothing_window_s > 0:
+                global CURRENT_SMOOTHING_S
+                CURRENT_SMOOTHING_S = request.settings.smoothing_window_s
+            
+            if request.settings.reset_buffers:
+                global RATIO_HISTORY, CALIBRATION_BUFFER
+                RATIO_HISTORY.clear()
+                CALIBRATION_BUFFER = []
+                print("Session buffers reset.")
+            
             # State transitions
             if request.target_state == state_v1_pb2.STATE_CALIBRATING:
                 IS_CALIBRATING = True
@@ -49,7 +61,7 @@ async def listen_for_commands(websocket):
         pass
 
 async def eeg_loop(websocket):
-    global CURRENT_MODE, RATIO_HISTORY, CALIBRATION_BUFFER, TARGET_RATIO, IS_CALIBRATING
+    global CURRENT_MODE, RATIO_HISTORY, CALIBRATION_BUFFER, TARGET_RATIO, IS_CALIBRATING, CURRENT_SMOOTHING_S
     stream = lsl_stream.EEGStream(chunk_size=12)
     ring = buffer.RingBuffer(size=512, channels=4)
     
@@ -118,7 +130,12 @@ async def eeg_loop(websocket):
                     
                     # Update History & Smoothing
                     RATIO_HISTORY.append(metrics['alpha_ratio'])
-                    smoothed_ratio = sum(RATIO_HISTORY) / len(RATIO_HISTORY)
+                    
+                    # Calculate mean over current window
+                    window_samples = max(1, int(CURRENT_SMOOTHING_S * 20))
+                    recent_samples = list(RATIO_HISTORY)[-window_samples:]
+                    smoothed_ratio = sum(recent_samples) / len(recent_samples)
+                    
                     payload.smoothed_alpha_ratio = smoothed_ratio
                     
                     # Handle Calibration

@@ -24,6 +24,8 @@ enum FilterMode {
 message SessionSettings {
   FilterMode filter_mode = 1;
   string participant_id = 2;
+  float smoothing_window_s = 3;
+  bool reset_buffers = 4;
 }
 
 message StateRequest {
