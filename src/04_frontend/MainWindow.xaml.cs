@@ -127,27 +127,22 @@ namespace Frontend
             {
                 Dispatcher.Invoke(() => 
                 {
-                    string scaleMode = "Magnitude";
-                    if (RbLogarithmic.IsChecked == true)
+                    string scaleMode = "Standard";
+                    if (RbCompensated.IsChecked == true)
                     {
-                        scaleMode = "Logarithmic";
-                    }
-                    else if (RbStandard.IsChecked == true)
-                    {
-                        scaleMode = "Standard";
+                        scaleMode = "Compensated";
                     }
 
                     for (int i = 0; i < 101; i++)
                     {
-                        _psdFreqs[i] = payload.PsdFreqs[i];
+                        double freq = payload.PsdFreqs[i];
+                        _psdFreqs[i] = freq;
                         double power = payload.PsdPowers[i];
                         
-                        if (scaleMode == "Logarithmic")
-                            _psdPowers[i] = 10 * Math.Log10(Math.Max(power, 1e-10));
-                        else if (scaleMode == "Standard")
-                            _psdPowers[i] = Math.Sqrt(power); // Amplitude
+                        if (scaleMode == "Compensated")
+                            _psdPowers[i] = power * Math.Max(freq, 0.5); // Flattening: P * f
                         else
-                            _psdPowers[i] = power; // Magnitude
+                            _psdPowers[i] = power; // Standard Magnitude
                     }
                 });
             }
@@ -190,14 +185,10 @@ namespace Frontend
         {
             double maxY = 100;
             double minY = 0;
-            if (RbLogarithmic.IsChecked == true)
+            
+            if (RbCompensated.IsChecked == true)
             {
-                minY = -15;
-                maxY = 30;
-            }
-            else if (RbStandard.IsChecked == true)
-            {
-                maxY = 20;
+                maxY = 250; // Higher limits needed for P * f
             }
             
             WpfPlotPSD_Monitor.Plot.Axes.SetLimits(0, 100, minY, maxY);

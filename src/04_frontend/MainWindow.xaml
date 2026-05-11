@@ -92,10 +92,9 @@
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,10,0" Panel.ZIndex="1">
-                            <TextBlock Text="PSD Scale: " Foreground="#A6ADC8" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                            <RadioButton x:Name="RbMagnitude" Content="Magnitude" IsChecked="True" Foreground="#CDD6F4" Margin="0,0,10,0" VerticalAlignment="Center" Checked="RbScale_Checked"/>
-                            <RadioButton x:Name="RbLogarithmic" Content="Logarithmic" Foreground="#CDD6F4" Margin="0,0,10,0" VerticalAlignment="Center" Checked="RbScale_Checked"/>
-                            <RadioButton x:Name="RbStandard" Content="Standard" Foreground="#CDD6F4" VerticalAlignment="Center" Checked="RbScale_Checked"/>
+                            <TextBlock Text="PSD View: " Foreground="#A6ADC8" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                            <RadioButton x:Name="RbStandard" Content="Standard" IsChecked="True" Foreground="#CDD6F4" Margin="0,0,10,0" VerticalAlignment="Center" Checked="RbScale_Checked"/>
+                            <RadioButton x:Name="RbCompensated" Content="Compensated (1/f)" Foreground="#CDD6F4" VerticalAlignment="Center" Checked="RbScale_Checked"/>
                         </StackPanel>
                         <ScottPlot:WpfPlot x:Name="WpfPlotPSD_Monitor" Grid.Row="1" PreviewMouseDown="WpfPlotPSD_PreviewMouseDown"/>
                     </Grid>
