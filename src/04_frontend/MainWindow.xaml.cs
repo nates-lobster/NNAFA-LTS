@@ -9,6 +9,7 @@ using Nnafa.Telemetry.V1;
 using ScottPlot;
 using ScottPlot.WPF;
 using Color = ScottPlot.Color;
+using Google.Protobuf;
 
 namespace Frontend
 {
