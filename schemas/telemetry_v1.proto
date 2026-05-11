@@ -14,6 +14,8 @@ message TelemetryPayload {
   Metrics metrics = 4;
   repeated double psd_freqs = 5;
   repeated double psd_powers = 6;
+  Channels raw_channels = 7;
+  Channels notched_channels = 8;
 }
 
 message Channels {

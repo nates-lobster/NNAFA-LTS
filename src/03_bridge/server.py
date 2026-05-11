@@ -27,7 +27,7 @@ async def eeg_loop(websocket):
                 
                 if data is not None:
                     # Pure DSP
-                    filtered = dsp.apply_filters(data)
+                    notched, filtered = dsp.apply_filters(data)
                     powers, freqs, psd_avg = dsp.compute_band_powers(filtered)
                     metrics = dsp.calculate_metrics(powers, data)
                     
@@ -35,12 +35,23 @@ async def eeg_loop(websocket):
                     payload = telemetry_v1_pb2.TelemetryPayload()
                     payload.timestamp_ms = stream.get_local_time() * 1000
                     
-                    # Assume latest chunk has current raw values
-                    latest = chunk[-1]
-                    payload.channels.tp9 = latest[0]
-                    payload.channels.af7 = latest[1]
-                    payload.channels.af8 = latest[2]
-                    payload.channels.tp10 = latest[3]
+                    # Use latest filtered sample for "clean" channel data
+                    payload.channels.tp9 = filtered[-1, 0]
+                    payload.channels.af7 = filtered[-1, 1]
+                    payload.channels.af8 = filtered[-1, 2]
+                    payload.channels.tp10 = filtered[-1, 3]
+
+                    # Latest raw sample
+                    payload.raw_channels.tp9 = data[-1, 0]
+                    payload.raw_channels.af7 = data[-1, 1]
+                    payload.raw_channels.af8 = data[-1, 2]
+                    payload.raw_channels.tp10 = data[-1, 3]
+
+                    # Latest notched sample
+                    payload.notched_channels.tp9 = notched[-1, 0]
+                    payload.notched_channels.af7 = notched[-1, 1]
+                    payload.notched_channels.af8 = notched[-1, 2]
+                    payload.notched_channels.tp10 = notched[-1, 3]
                     
                     payload.band_power.delta = powers['delta']
                     payload.band_power.theta = powers['theta']

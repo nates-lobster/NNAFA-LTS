@@ -28,6 +28,20 @@ namespace Frontend
         private readonly double[] _psdFreqs = new double[101];
         private readonly double[] _psdPowers = new double[101];
 
+        // Historical Buffers (600 samples = 30s at 20Hz)
+        private readonly double[] _historyDelta = new double[600];
+        private readonly double[] _historyTheta = new double[600];
+        private readonly double[] _historyAlpha = new double[600];
+        private readonly double[] _historyBeta = new double[600];
+        private readonly double[] _historyGamma = new double[600];
+        private int _historyIndex = 0;
+
+        // Debug Buffers (512 samples)
+        private readonly double[] _debugRawData = new double[512];
+        private readonly double[] _debugNotchedData = new double[512];
+        private readonly double[] _debugFilteredData = new double[512];
+        private int _debugDataIndex = 0;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -58,6 +72,49 @@ namespace Frontend
             
             SetupPsdPlot(WpfPlotPSD_Monitor);
             SetupPsdPlot(WpfPlotPSD_NFB);
+            SetupHistoryPlot();
+            SetupDebugPlots();
+        }
+
+        private void SetupHistoryPlot()
+        {
+            WpfPlotHistory.Plot.Title("Brainwave Power Trends (Last 30s)");
+            WpfPlotHistory.Plot.XLabel("Time (30s Window)");
+            WpfPlotHistory.Plot.YLabel("Power");
+
+            var d = WpfPlotHistory.Plot.Add.Signal(_historyDelta); d.Label = "Delta"; d.Color = Color.FromHex("#666666");
+            var t = WpfPlotHistory.Plot.Add.Signal(_historyTheta); t.Label = "Theta"; t.Color = Color.FromHex("#800080");
+            var a = WpfPlotHistory.Plot.Add.Signal(_historyAlpha); a.Label = "Alpha"; a.Color = Color.FromHex("#008000");
+            var b = WpfPlotHistory.Plot.Add.Signal(_historyBeta); b.Label = "Beta"; b.Color = Color.FromHex("#000080");
+            var g = WpfPlotHistory.Plot.Add.Signal(_historyGamma); g.Label = "Gamma"; g.Color = Color.FromHex("#808000");
+
+            WpfPlotHistory.Plot.ShowLegend(Alignment.UpperLeft);
+            WpfPlotHistory.Plot.FigureBackground.Color = Color.FromHex("#1E1E2E");
+            WpfPlotHistory.Plot.DataBackground.Color = Color.FromHex("#313244");
+            WpfPlotHistory.Plot.Axes.Color(Color.FromHex("#A6ADC8"));
+            WpfPlotHistory.Plot.Axes.SetLimitsY(0, 100);
+            WpfPlotHistory.Refresh();
+        }
+
+        private void SetupDebugPlots()
+        {
+            var debugPlots = new[] { WpfPlotDebugRaw, WpfPlotDebugNotched, WpfPlotDebugFiltered };
+            var titles = new[] { "1. Raw Signal", "2. Post-Notch (60Hz)", "3. Post-Bandpass (1-100Hz)" };
+            var arrays = new[] { _debugRawData, _debugNotchedData, _debugFilteredData };
+
+            for (int i = 0; i < debugPlots.Length; i++)
+            {
+                debugPlots[i].Plot.Add.Signal(arrays[i]);
+                debugPlots[i].Plot.Title(titles[i]);
+                debugPlots[i].Plot.FigureBackground.Color = Color.FromHex("#1E1E2E");
+                debugPlots[i].Plot.DataBackground.Color = Color.FromHex("#313244");
+                debugPlots[i].Plot.Axes.Color(Color.FromHex("#A6ADC8"));
+                debugPlots[i].Plot.Axes.SetLimitsY(-200, 200);
+                debugPlots[i].Refresh();
+            }
+
+            SetupPsdPlot(WpfPlotDebugPSD);
+            WpfPlotDebugPSD.Plot.Title("4. Final PSD (after FFT)");
         }
 
         private void SetupPsdPlot(WpfPlot plot)
@@ -106,6 +163,11 @@ namespace Frontend
                             
                             WpfPlotPSD_Monitor.Refresh();
                             WpfPlotPSD_NFB.Refresh();
+                            WpfPlotHistory.Refresh();
+                            WpfPlotDebugRaw.Refresh();
+                            WpfPlotDebugNotched.Refresh();
+                            WpfPlotDebugFiltered.Refresh();
+                            WpfPlotDebugPSD.Refresh();
                         });
                     }
                 }, _cts.Token);
@@ -172,6 +234,32 @@ namespace Frontend
 
                 AlphaRatioText.Text = payload.Metrics.AlphaRatio.ToString("F2");
                 AlphaRatioBar.Value = payload.Metrics.AlphaRatio;
+
+                // Update History Buffers (happens ~20 times/sec)
+                _historyDelta[_historyIndex] = payload.BandPower.Delta;
+                _historyTheta[_historyIndex] = payload.BandPower.Theta;
+                _historyAlpha[_historyIndex] = payload.BandPower.Alpha;
+                _historyBeta[_historyIndex] = payload.BandPower.Beta;
+                _historyGamma[_historyIndex] = payload.BandPower.Gamma;
+                _historyIndex = (_historyIndex + 1) % 600;
+
+                // Update Debug Buffers based on selected RadioButton
+                double raw = 0, notched = 0, filtered = 0;
+                if (RbDebugTP9.IsChecked == true) { raw = payload.RawChannels.Tp9; notched = payload.NotchedChannels.Tp9; filtered = payload.Channels.Tp9; }
+                else if (RbDebugAF7.IsChecked == true) { raw = payload.RawChannels.Af7; notched = payload.NotchedChannels.Af7; filtered = payload.Channels.Af7; }
+                else if (RbDebugAF8.IsChecked == true) { raw = payload.RawChannels.Af8; notched = payload.NotchedChannels.Af8; filtered = payload.Channels.Af8; }
+                else if (RbDebugTP10.IsChecked == true) { raw = payload.RawChannels.Tp10; notched = payload.NotchedChannels.Tp10; filtered = payload.Channels.Tp10; }
+                else if (RbDebugAvg.IsChecked == true)
+                {
+                    raw = (payload.RawChannels.Tp9 + payload.RawChannels.Af7 + payload.RawChannels.Af8 + payload.RawChannels.Tp10) / 4.0;
+                    notched = (payload.NotchedChannels.Tp9 + payload.NotchedChannels.Af7 + payload.NotchedChannels.Af8 + payload.NotchedChannels.Tp10) / 4.0;
+                    filtered = (payload.Channels.Tp9 + payload.Channels.Af7 + payload.Channels.Af8 + payload.Channels.Tp10) / 4.0;
+                }
+
+                _debugRawData[_debugDataIndex] = raw;
+                _debugNotchedData[_debugDataIndex] = notched;
+                _debugFilteredData[_debugDataIndex] = filtered;
+                _debugDataIndex = (_debugDataIndex + 1) % 512;
             });
         }
 

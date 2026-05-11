@@ -15,9 +15,9 @@ def apply_filters(data):
     low = 1.0 / nyq
     high = 100.0 / nyq
     b_band, a_band = butter(4, [low, high], btype='band')
-    filtered = lfilter(b_band, a_band, notched, axis=0)
+    bandpassed = lfilter(b_band, a_band, notched, axis=0)
     
-    return filtered
+    return notched, bandpassed
 
 def compute_band_powers(filtered_data):
     """
