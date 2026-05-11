@@ -64,6 +64,7 @@ async def eeg_loop(websocket):
     global CURRENT_MODE, RATIO_HISTORY, CALIBRATION_BUFFER, TARGET_RATIO, IS_CALIBRATING, CURRENT_SMOOTHING_S
     stream = lsl_stream.EEGStream(chunk_size=12)
     ring = buffer.RingBuffer(size=512, channels=4)
+    last_data_time = time.time()
     
     print("Client connected. Waiting for EEG data...")
     # Start command listener in background
@@ -77,6 +78,7 @@ async def eeg_loop(websocket):
                 data = ring.get_data()
                 
                 if data is not None:
+                    last_data_time = time.time()
                     # Pure DSP
                     notched, fir_denoised, filtered = dsp.apply_filters(data, mode=CURRENT_MODE)
                     powers, freqs, psd_avg, psd_all = dsp.compute_band_powers(filtered)
@@ -84,6 +86,7 @@ async def eeg_loop(websocket):
                     
                     # Create Protobuf Payload
                     payload = telemetry_v1_pb2.TelemetryPayload()
+                    payload.is_stalled = False
                     payload.timestamp_ms = stream.get_local_time() * 1000
                     
                     # Use latest filtered sample for "clean" channel data
@@ -151,8 +154,16 @@ async def eeg_loop(websocket):
                             print(f"Calibration complete. Target: {TARGET_RATIO:.2f}")
                     
                     payload.target_ratio = TARGET_RATIO
+                else:
+                    # No data this tick, check if we've stalled
+                    is_stalled = (time.time() - last_data_time) > 2.0
+                    payload = telemetry_v1_pb2.TelemetryPayload()
+                    payload.is_stalled = is_stalled
+                
+                if payload.is_stalled:
+                    print("LSL stream stalled! Check BlueMuse.")
 
-                    if metrics['signal_integrity'] == "GREEN":
+                if metrics['signal_integrity'] == "GREEN":
                         payload.metrics.signal_integrity = telemetry_v1_pb2.GREEN
                     elif metrics['signal_integrity'] == "RED":
                         payload.metrics.signal_integrity = telemetry_v1_pb2.RED

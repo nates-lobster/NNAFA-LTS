@@ -25,6 +25,7 @@
                     <TextBlock Text="Signal Status: " FontSize="18" FontWeight="Bold" Foreground="#CDD6F4"/>
                     <TextBlock x:Name="TxtStatus" Text="WAITING" FontSize="18" FontWeight="Bold" Foreground="Gray" Margin="5,0"/>
                     <Ellipse x:Name="IntegrityLight" Width="20" Height="20" Fill="Gray" Margin="10,0"/>
+                    <TextBlock x:Name="TxtStalled" Text="STALLED" Foreground="#F38BA8" FontWeight="Bold" Margin="15,0,0,0" Visibility="Collapsed" VerticalAlignment="Center"/>
                 </StackPanel>
                 
                 <!-- Power Levels -->

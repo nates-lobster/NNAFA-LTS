@@ -255,6 +255,11 @@ namespace Frontend
                 string statusText = payload.Metrics.SignalIntegrity.ToString().ToUpper();
                 TxtStatus.Text = statusText;
 
+                // Update Stalled indicator
+                TxtStalled.Visibility = payload.IsStalled ? Visibility.Visible : Visibility.Collapsed;
+                if (payload.IsStalled) return; // Don't process garbage if stalled
+
+                // Update Integrity Light
                 IntegrityLight.Fill = payload.Metrics.SignalIntegrity switch
                 {
                     SignalIntegrity.Green => Brushes.LimeGreen,

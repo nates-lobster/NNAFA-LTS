@@ -27,6 +27,7 @@ message TelemetryPayload {
   float smoothed_alpha_ratio = 14;
   float calibration_progress = 15;
   float target_ratio = 16;
+  bool is_stalled = 17;
 }
 
 message Channels {
