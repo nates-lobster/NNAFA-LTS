@@ -55,17 +55,19 @@ def compute_band_powers(filtered_data):
         
     return powers, freqs, psd_avg, psd
 
-def calculate_metrics(powers, raw_data):
+def calculate_metrics(powers, raw_data, notched_data):
     """
-    Calculates the alpha ratio and signal integrity based on >100uV threshold on AF7/AF8.
-    Assumes channels are [TP9, AF7, AF8, TP10].
+    Calculates the alpha ratio and signal integrity based on >150uV threshold on AF7/AF8.
+    Uses notched_data and a shorter window to avoid DC drift false positives.
     """
     alpha = powers.get('alpha', 0)
     beta = powers.get('beta', 0)
     alpha_ratio = alpha / beta if beta > 0 else 0
     
-    af7 = raw_data[:, 1]
-    af8 = raw_data[:, 2]
+    # Check only the last 0.25 seconds (64 samples at 256Hz)
+    window = 64
+    af7 = notched_data[-window:, 1]
+    af8 = notched_data[-window:, 2]
     
     p2p_af7 = np.max(af7) - np.min(af7)
     p2p_af8 = np.max(af8) - np.min(af8)

@@ -68,7 +68,7 @@ async def eeg_loop(websocket):
                     # Pure DSP
                     notched, fir_denoised, filtered = dsp.apply_filters(data, mode=CURRENT_MODE)
                     powers, freqs, psd_avg, psd_all = dsp.compute_band_powers(filtered)
-                    metrics = dsp.calculate_metrics(powers, data)
+                    metrics = dsp.calculate_metrics(powers, data, notched)
                     
                     # Create Protobuf Payload
                     payload = telemetry_v1_pb2.TelemetryPayload()
