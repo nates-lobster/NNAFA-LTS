@@ -70,6 +70,14 @@ namespace Frontend
             }
         }
 
+        public async Task SendAsync(byte[] data, CancellationToken ct)
+        {
+            if (_client.State == WebSocketState.Open)
+            {
+                await _client.SendAsync(new ArraySegment<byte>(data), WebSocketMessageType.Binary, true, ct);
+            }
+        }
+
         public async Task DisconnectAsync()
         {
             if (_client.State == WebSocketState.Open)

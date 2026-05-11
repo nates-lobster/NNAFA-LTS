@@ -7,24 +7,28 @@ FS = 256.0
 TAPS = 129
 fir_coeffs = firwin(TAPS, [1.0, 100.0], pass_zero=False, fs=FS)
 
-def apply_filters(data):
+def apply_filters(data, mode="BOTH"):
     """
-    Applies 60Hz notch, FIR Denoising (1-100Hz), and IIR Bandpass.
-    data shape: (samples, channels)
+    Applies filters based on mode: BOTH, ONLY_IIR, ONLY_FIR.
     """
     nyq = 0.5 * FS
     b_notch, a_notch = iirnotch(60.0, 30.0, FS)
     notched = lfilter(b_notch, a_notch, data, axis=0)
     
-    low = 1.0 / nyq
-    high = 100.0 / nyq
-    
-    # FIR Denoising (Linear Phase)
-    fir_denoised = lfilter(fir_coeffs, 1.0, notched, axis=0)
-    
-    # IIR Bandpass (Butterworth)
-    b_band, a_band = butter(4, [low, high], btype='band')
-    bandpassed = lfilter(b_band, a_band, fir_denoised, axis=0)
+    # FIR Stage
+    if mode in ["BOTH", "ONLY_FIR"]:
+        fir_denoised = lfilter(fir_coeffs, 1.0, notched, axis=0)
+    else:
+        fir_denoised = notched # Pass through
+        
+    # IIR Stage
+    if mode in ["BOTH", "ONLY_IIR"]:
+        low = 1.0 / nyq
+        high = 100.0 / nyq
+        b_band, a_band = butter(4, [low, high], btype='band')
+        bandpassed = lfilter(b_band, a_band, fir_denoised, axis=0)
+    else:
+        bandpassed = fir_denoised # Pass through
     
     return notched, fir_denoised, bandpassed
 

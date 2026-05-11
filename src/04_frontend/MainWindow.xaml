@@ -157,6 +157,38 @@
                 </Grid>
             </TabItem>
 
+            <!-- Debug Overlay Tab -->
+            <TabItem Header="Debug Overlay">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Layer Toggles -->
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
+                        <TextBlock Text="Layers: " VerticalAlignment="Center" Margin="0,0,10,0" Foreground="#A6ADC8"/>
+                        <CheckBox x:Name="CbShowRaw" Content="1. Raw" IsChecked="True" Foreground="#CDD6F4" Margin="0,0,10,0" VerticalAlignment="Center" Checked="CbLayer_Changed" Unchecked="CbLayer_Changed"/>
+                        <CheckBox x:Name="CbShowNotched" Content="2. Notch" IsChecked="True" Foreground="#CDD6F4" Margin="0,0,10,0" VerticalAlignment="Center" Checked="CbLayer_Changed" Unchecked="CbLayer_Changed"/>
+                        <CheckBox x:Name="CbShowFir" Content="3. FIR" IsChecked="True" Foreground="#CDD6F4" Margin="0,0,10,0" VerticalAlignment="Center" Checked="CbLayer_Changed" Unchecked="CbLayer_Changed"/>
+                        <CheckBox x:Name="CbShowIir" Content="4. IIR" IsChecked="True" Foreground="#CDD6F4" VerticalAlignment="Center" Checked="CbLayer_Changed" Unchecked="CbLayer_Changed"/>
+                    </StackPanel>
+
+                    <ScottPlot:WpfPlot x:Name="WpfPlotOverlay" Grid.Row="1" Margin="10"/>
+
+                    <!-- Filter Mode Selection -->
+                    <Border Grid.Row="2" Background="#313244" Padding="10" CornerRadius="5" Margin="20,0,20,10">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <TextBlock Text="Filter Mode: " VerticalAlignment="Center" Margin="0,0,20,0" FontWeight="Bold" Foreground="#89B4FA"/>
+                            <RadioButton x:Name="RbModeBoth" Content="Combined (FIR+IIR)" IsChecked="True" Foreground="#CDD6F4" Margin="0,0,20,0" VerticalAlignment="Center" Checked="RbFilterMode_Checked"/>
+                            <RadioButton x:Name="RbModeIirOnly" Content="Only IIR (Standard)" Foreground="#CDD6F4" Margin="0,0,20,0" VerticalAlignment="Center" Checked="RbFilterMode_Checked"/>
+                            <RadioButton x:Name="RbModeFirOnly" Content="Only FIR (Linear Phase)" Foreground="#CDD6F4" VerticalAlignment="Center" Checked="RbFilterMode_Checked"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </TabItem>
+
             <!-- Research Tab -->
             <TabItem Header="Research &amp; Tools">
                 <Grid>

@@ -12,12 +12,38 @@ import lsl_stream
 import buffer
 import dsp
 import telemetry_v1_pb2
+import state_v1_pb2
+
+# Global settings (simplified for V0.2)
+CURRENT_MODE = "BOTH"
+
+async def listen_for_commands(websocket):
+    global CURRENT_MODE
+    try:
+        async for message in websocket:
+            request = state_v1_pb2.StateRequest()
+            request.ParseFromString(message)
+            
+            if request.settings.filter_mode == state_v1_pb2.FILTER_BOTH:
+                CURRENT_MODE = "BOTH"
+            elif request.settings.filter_mode == state_v1_pb2.FILTER_ONLY_IIR:
+                CURRENT_MODE = "ONLY_IIR"
+            elif request.settings.filter_mode == state_v1_pb2.FILTER_ONLY_FIR:
+                CURRENT_MODE = "ONLY_FIR"
+            
+            print(f"Filter mode changed to: {CURRENT_MODE}")
+    except Exception as e:
+        pass # Client disconnected or invalid message
 
 async def eeg_loop(websocket):
+    global CURRENT_MODE
     stream = lsl_stream.EEGStream(chunk_size=12)
     ring = buffer.RingBuffer(size=512, channels=4)
     
     print("Client connected. Waiting for EEG data...")
+    # Start command listener in background
+    cmd_task = asyncio.create_task(listen_for_commands(websocket))
+    
     try:
         while True:
             chunk, timestamps = stream.get_chunk()
@@ -27,7 +53,7 @@ async def eeg_loop(websocket):
                 
                 if data is not None:
                     # Pure DSP
-                    notched, fir_denoised, filtered = dsp.apply_filters(data)
+                    notched, fir_denoised, filtered = dsp.apply_filters(data, mode=CURRENT_MODE)
                     powers, freqs, psd_avg, psd_all = dsp.compute_band_powers(filtered)
                     metrics = dsp.calculate_metrics(powers, data)
                     

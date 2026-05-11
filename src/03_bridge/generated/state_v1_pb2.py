@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0estate_v1.proto\x12\x0ennafa.state.v1\"\xa0\x01\n\x0fStateTransition\x12\x14\n\x0ctimestamp_ms\x18\x01 \x01(\x01\x12\x33\n\x0eprevious_state\x18\x02 \x01(\x0e\x32\x1b.nnafa.state.v1.SystemState\x12\x32\n\rcurrent_state\x18\x03 \x01(\x0e\x32\x1b.nnafa.state.v1.SystemState\x12\x0e\n\x06reason\x18\x04 \x01(\t*\xa9\x01\n\x0bSystemState\x12\x11\n\rSTATE_UNKNOWN\x10\x00\x12\x0e\n\nSTATE_INIT\x10\x01\x12\x15\n\x11STATE_CALIBRATING\x10\x02\x12\x14\n\x10STATE_BASELINING\x10\x03\x12\x1d\n\x19STATE_TRAINING_RELAXATION\x10\x04\x12\x18\n\x14STATE_TRAINING_FOCUS\x10\x05\x12\x11\n\rSTATE_STOPPED\x10\x06\x42\x11\xaa\x02\x0eNnafa.State.V1b\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0estate_v1.proto\x12\x0ennafa.state.v1\"Z\n\x0fSessionSettings\x12/\n\x0b\x66ilter_mode\x18\x01 \x01(\x0e\x32\x1a.nnafa.state.v1.FilterMode\x12\x16\n\x0eparticipant_id\x18\x02 \x01(\t\"t\n\x0cStateRequest\x12\x31\n\x0ctarget_state\x18\x01 \x01(\x0e\x32\x1b.nnafa.state.v1.SystemState\x12\x31\n\x08settings\x18\x02 \x01(\x0b\x32\x1f.nnafa.state.v1.SessionSettings\"\xa0\x01\n\x0fStateTransition\x12\x14\n\x0ctimestamp_ms\x18\x01 \x01(\x01\x12\x33\n\x0eprevious_state\x18\x02 \x01(\x0e\x32\x1b.nnafa.state.v1.SystemState\x12\x32\n\rcurrent_state\x18\x03 \x01(\x0e\x32\x1b.nnafa.state.v1.SystemState\x12\x0e\n\x06reason\x18\x04 \x01(\t*\xa9\x01\n\x0bSystemState\x12\x11\n\rSTATE_UNKNOWN\x10\x00\x12\x0e\n\nSTATE_INIT\x10\x01\x12\x15\n\x11STATE_CALIBRATING\x10\x02\x12\x14\n\x10STATE_BASELINING\x10\x03\x12\x1d\n\x19STATE_TRAINING_RELAXATION\x10\x04\x12\x18\n\x14STATE_TRAINING_FOCUS\x10\x05\x12\x11\n\rSTATE_STOPPED\x10\x06*G\n\nFilterMode\x12\x0f\n\x0b\x46ILTER_BOTH\x10\x00\x12\x13\n\x0f\x46ILTER_ONLY_IIR\x10\x01\x12\x13\n\x0f\x46ILTER_ONLY_FIR\x10\x02\x42\x11\xaa\x02\x0eNnafa.State.V1b\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -32,8 +32,14 @@ _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'state_v1_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   _globals['DESCRIPTOR']._loaded_options = None
   _globals['DESCRIPTOR']._serialized_options = b'\252\002\016Nnafa.State.V1'
-  _globals['_SYSTEMSTATE']._serialized_start=198
-  _globals['_SYSTEMSTATE']._serialized_end=367
-  _globals['_STATETRANSITION']._serialized_start=35
-  _globals['_STATETRANSITION']._serialized_end=195
+  _globals['_SYSTEMSTATE']._serialized_start=408
+  _globals['_SYSTEMSTATE']._serialized_end=577
+  _globals['_FILTERMODE']._serialized_start=579
+  _globals['_FILTERMODE']._serialized_end=650
+  _globals['_SESSIONSETTINGS']._serialized_start=34
+  _globals['_SESSIONSETTINGS']._serialized_end=124
+  _globals['_STATEREQUEST']._serialized_start=126
+  _globals['_STATEREQUEST']._serialized_end=242
+  _globals['_STATETRANSITION']._serialized_start=245
+  _globals['_STATETRANSITION']._serialized_end=405
 # @@protoc_insertion_point(module_scope)

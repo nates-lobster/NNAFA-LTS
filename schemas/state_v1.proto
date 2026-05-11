@@ -15,6 +15,22 @@ enum SystemState {
   STATE_STOPPED = 6;
 }
 
+enum FilterMode {
+  FILTER_BOTH = 0;
+  FILTER_ONLY_IIR = 1;
+  FILTER_ONLY_FIR = 2;
+}
+
+message SessionSettings {
+  FilterMode filter_mode = 1;
+  string participant_id = 2;
+}
+
+message StateRequest {
+  SystemState target_state = 1;
+  SessionSettings settings = 2;
+}
+
 message StateTransition {
   double timestamp_ms = 1;
   SystemState previous_state = 2;

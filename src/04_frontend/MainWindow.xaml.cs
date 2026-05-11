@@ -44,6 +44,12 @@ namespace Frontend
         private readonly double[] _debugPsdPowers = new double[101];
         private int _debugDataIndex = 0;
 
+        // Overlay plot handles
+        private ScottPlot.Plottables.Signal? _sigRaw;
+        private ScottPlot.Plottables.Signal? _sigNotch;
+        private ScottPlot.Plottables.Signal? _sigFir;
+        private ScottPlot.Plottables.Signal? _sigIir;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -76,6 +82,24 @@ namespace Frontend
             SetupPsdPlot(WpfPlotPSD_NFB);
             SetupHistoryPlot();
             SetupDebugPlots();
+            SetupOverlayPlot();
+        }
+
+        private void SetupOverlayPlot()
+        {
+            WpfPlotOverlay.Plot.Title("Debug Pipeline Overlay");
+            WpfPlotOverlay.Plot.FigureBackground.Color = Color.FromHex("#1E1E2E");
+            WpfPlotOverlay.Plot.DataBackground.Color = Color.FromHex("#313244");
+            WpfPlotOverlay.Plot.Axes.Color(Color.FromHex("#A6ADC8"));
+            WpfPlotOverlay.Plot.Axes.SetLimitsY(-200, 200);
+
+            _sigRaw = WpfPlotOverlay.Plot.Add.Signal(_debugRawData); _sigRaw.LegendText = "Raw"; _sigRaw.Color = Color.FromHex("#666666");
+            _sigNotch = WpfPlotOverlay.Plot.Add.Signal(_debugNotchedData); _sigNotch.LegendText = "Notch"; _sigNotch.Color = Color.FromHex("#F38BA8");
+            _sigFir = WpfPlotOverlay.Plot.Add.Signal(_debugFirData); _sigFir.LegendText = "FIR"; _sigFir.Color = Color.FromHex("#FAB387");
+            _sigIir = WpfPlotOverlay.Plot.Add.Signal(_debugFilteredData); _sigIir.LegendText = "IIR"; _sigIir.Color = Color.FromHex("#A6E3A1");
+
+            WpfPlotOverlay.Plot.ShowLegend(Alignment.UpperRight);
+            WpfPlotOverlay.Refresh();
         }
 
         private void SetupHistoryPlot()
@@ -176,6 +200,7 @@ namespace Frontend
                             WpfPlotDebugFir.Refresh();
                             WpfPlotDebugFiltered.Refresh();
                             WpfPlotDebugPSD.Refresh();
+                            WpfPlotOverlay.Refresh();
                         });
                     }
                 }, _cts.Token);
@@ -333,6 +358,35 @@ namespace Frontend
             WpfPlotDebugFir?.Refresh();
             WpfPlotDebugFiltered?.Refresh();
             WpfPlotDebugPSD?.Refresh();
+            WpfPlotOverlay?.Refresh();
+        }
+
+        private void CbLayer_Changed(object sender, RoutedEventArgs e)
+        {
+            if (!IsLoaded || _sigRaw == null) return;
+            
+            _sigRaw.IsVisible = CbShowRaw.IsChecked == true;
+            _sigNotch.IsVisible = CbShowNotched.IsChecked == true;
+            _sigFir.IsVisible = CbShowFir.IsChecked == true;
+            _sigIir.IsVisible = CbShowIir.IsChecked == true;
+            
+            WpfPlotOverlay.Refresh();
+        }
+
+        private async void RbFilterMode_Checked(object sender, RoutedEventArgs e)
+        {
+            if (!IsLoaded) return;
+
+            var mode = Nnafa.State.V1.FilterMode.FilterBoth;
+            if (RbModeIirOnly.IsChecked == true) mode = Nnafa.State.V1.FilterMode.FilterOnlyIir;
+            if (RbModeFirOnly.IsChecked == true) mode = Nnafa.State.V1.FilterMode.FilterOnlyFir;
+
+            var request = new Nnafa.State.V1.StateRequest
+            {
+                Settings = new Nnafa.State.V1.SessionSettings { FilterMode = mode }
+            };
+
+            await _telemetryClient.SendAsync(request.ToByteArray(), _cts.Token);
         }
 
         private void KillPython_Click(object sender, RoutedEventArgs e)
