@@ -13,17 +13,24 @@ import buffer
 import dsp
 import telemetry_v1_pb2
 import state_v1_pb2
+from collections import deque
 
-# Global settings (simplified for V0.2)
+# Global settings and state
 CURRENT_MODE = "BOTH"
+RATIO_HISTORY = deque(maxlen=100) # 5s @ 20Hz
+CALIBRATION_BUFFER = []
+TARGET_RATIO = 1.0
+CALIBRATION_TOTAL_SAMPLES = 600 # 30s @ 20Hz
+IS_CALIBRATING = False
 
 async def listen_for_commands(websocket):
-    global CURRENT_MODE
+    global CURRENT_MODE, IS_CALIBRATING, CALIBRATION_BUFFER
     try:
         async for message in websocket:
             request = state_v1_pb2.StateRequest()
             request.ParseFromString(message)
             
+            # Filter mode
             if request.settings.filter_mode == state_v1_pb2.FILTER_BOTH:
                 CURRENT_MODE = "BOTH"
             elif request.settings.filter_mode == state_v1_pb2.FILTER_ONLY_IIR:
@@ -31,12 +38,18 @@ async def listen_for_commands(websocket):
             elif request.settings.filter_mode == state_v1_pb2.FILTER_ONLY_FIR:
                 CURRENT_MODE = "ONLY_FIR"
             
-            print(f"Filter mode changed to: {CURRENT_MODE}")
+            # State transitions
+            if request.target_state == state_v1_pb2.STATE_CALIBRATING:
+                IS_CALIBRATING = True
+                CALIBRATION_BUFFER = []
+                print("Starting 30s calibration...")
+            
+            print(f"Command received. Mode: {CURRENT_MODE}, Calibrating: {IS_CALIBRATING}")
     except Exception as e:
-        pass # Client disconnected or invalid message
+        pass
 
 async def eeg_loop(websocket):
-    global CURRENT_MODE
+    global CURRENT_MODE, RATIO_HISTORY, CALIBRATION_BUFFER, TARGET_RATIO, IS_CALIBRATING
     stream = lsl_stream.EEGStream(chunk_size=12)
     ring = buffer.RingBuffer(size=512, channels=4)
     
@@ -102,6 +115,26 @@ async def eeg_loop(websocket):
                     payload.psd_tp10.extend(psd_all[freq_limit_idx, 3].tolist())
                     
                     payload.metrics.alpha_ratio = metrics['alpha_ratio']
+                    
+                    # Update History & Smoothing
+                    RATIO_HISTORY.append(metrics['alpha_ratio'])
+                    smoothed_ratio = sum(RATIO_HISTORY) / len(RATIO_HISTORY)
+                    payload.smoothed_alpha_ratio = smoothed_ratio
+                    
+                    # Handle Calibration
+                    if IS_CALIBRATING:
+                        CALIBRATION_BUFFER.append(metrics['alpha_ratio'])
+                        progress = len(CALIBRATION_BUFFER) / CALIBRATION_TOTAL_SAMPLES
+                        payload.calibration_progress = progress
+                        if len(CALIBRATION_BUFFER) >= CALIBRATION_TOTAL_SAMPLES:
+                            # End calibration, set target ratio
+                            # Target = Mean + 0.1 (make it slightly harder than baseline)
+                            TARGET_RATIO = sum(CALIBRATION_BUFFER) / len(CALIBRATION_BUFFER) + 0.1
+                            IS_CALIBRATING = False
+                            print(f"Calibration complete. Target: {TARGET_RATIO:.2f}")
+                    
+                    payload.target_ratio = TARGET_RATIO
+
                     if metrics['signal_integrity'] == "GREEN":
                         payload.metrics.signal_integrity = telemetry_v1_pb2.GREEN
                     elif metrics['signal_integrity'] == "RED":

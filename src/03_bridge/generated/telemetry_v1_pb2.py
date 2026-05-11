@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x12telemetry_v1.proto\x12\x12nnafa.telemetry.v1\"\xc5\x03\n\x10TelemetryPayload\x12\x14\n\x0ctimestamp_ms\x18\x01 \x01(\x01\x12.\n\x08\x63hannels\x18\x02 \x01(\x0b\x32\x1c.nnafa.telemetry.v1.Channels\x12\x31\n\nband_power\x18\x03 \x01(\x0b\x32\x1d.nnafa.telemetry.v1.BandPower\x12,\n\x07metrics\x18\x04 \x01(\x0b\x32\x1b.nnafa.telemetry.v1.Metrics\x12\x11\n\tpsd_freqs\x18\x05 \x03(\x01\x12\x12\n\npsd_powers\x18\x06 \x03(\x01\x12\x32\n\x0craw_channels\x18\x07 \x01(\x0b\x32\x1c.nnafa.telemetry.v1.Channels\x12\x36\n\x10notched_channels\x18\x08 \x01(\x0b\x32\x1c.nnafa.telemetry.v1.Channels\x12\x0f\n\x07psd_tp9\x18\t \x03(\x01\x12\x0f\n\x07psd_af7\x18\n \x03(\x01\x12\x0f\n\x07psd_af8\x18\x0b \x03(\x01\x12\x10\n\x08psd_tp10\x18\x0c \x03(\x01\x12\x32\n\x0c\x66ir_channels\x18\r \x01(\x0b\x32\x1c.nnafa.telemetry.v1.Channels\"?\n\x08\x43hannels\x12\x0b\n\x03tp9\x18\x01 \x01(\x01\x12\x0b\n\x03\x61\x66\x37\x18\x02 \x01(\x01\x12\x0b\n\x03\x61\x66\x38\x18\x03 \x01(\x01\x12\x0c\n\x04tp10\x18\x04 \x01(\x01\"U\n\tBandPower\x12\r\n\x05\x64\x65lta\x18\x01 \x01(\x01\x12\r\n\x05theta\x18\x02 \x01(\x01\x12\r\n\x05\x61lpha\x18\x03 \x01(\x01\x12\x0c\n\x04\x62\x65ta\x18\x04 \x01(\x01\x12\r\n\x05gamma\x18\x05 \x01(\x01\"]\n\x07Metrics\x12\x13\n\x0b\x61lpha_ratio\x18\x01 \x01(\x01\x12=\n\x10signal_integrity\x18\x02 \x01(\x0e\x32#.nnafa.telemetry.v1.SignalIntegrity*>\n\x0fSignalIntegrity\x12\x0b\n\x07UNKNOWN\x10\x00\x12\t\n\x05GREEN\x10\x01\x12\n\n\x06YELLOW\x10\x02\x12\x07\n\x03RED\x10\x03\x42\x15\xaa\x02\x12Nnafa.Telemetry.V1b\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x12telemetry_v1.proto\x12\x12nnafa.telemetry.v1\"\x97\x04\n\x10TelemetryPayload\x12\x14\n\x0ctimestamp_ms\x18\x01 \x01(\x01\x12.\n\x08\x63hannels\x18\x02 \x01(\x0b\x32\x1c.nnafa.telemetry.v1.Channels\x12\x31\n\nband_power\x18\x03 \x01(\x0b\x32\x1d.nnafa.telemetry.v1.BandPower\x12,\n\x07metrics\x18\x04 \x01(\x0b\x32\x1b.nnafa.telemetry.v1.Metrics\x12\x11\n\tpsd_freqs\x18\x05 \x03(\x01\x12\x12\n\npsd_powers\x18\x06 \x03(\x01\x12\x32\n\x0craw_channels\x18\x07 \x01(\x0b\x32\x1c.nnafa.telemetry.v1.Channels\x12\x36\n\x10notched_channels\x18\x08 \x01(\x0b\x32\x1c.nnafa.telemetry.v1.Channels\x12\x0f\n\x07psd_tp9\x18\t \x03(\x01\x12\x0f\n\x07psd_af7\x18\n \x03(\x01\x12\x0f\n\x07psd_af8\x18\x0b \x03(\x01\x12\x10\n\x08psd_tp10\x18\x0c \x03(\x01\x12\x32\n\x0c\x66ir_channels\x18\r \x01(\x0b\x32\x1c.nnafa.telemetry.v1.Channels\x12\x1c\n\x14smoothed_alpha_ratio\x18\x0e \x01(\x02\x12\x1c\n\x14\x63\x61libration_progress\x18\x0f \x01(\x02\x12\x14\n\x0ctarget_ratio\x18\x10 \x01(\x02\"?\n\x08\x43hannels\x12\x0b\n\x03tp9\x18\x01 \x01(\x01\x12\x0b\n\x03\x61\x66\x37\x18\x02 \x01(\x01\x12\x0b\n\x03\x61\x66\x38\x18\x03 \x01(\x01\x12\x0c\n\x04tp10\x18\x04 \x01(\x01\"U\n\tBandPower\x12\r\n\x05\x64\x65lta\x18\x01 \x01(\x01\x12\r\n\x05theta\x18\x02 \x01(\x01\x12\r\n\x05\x61lpha\x18\x03 \x01(\x01\x12\x0c\n\x04\x62\x65ta\x18\x04 \x01(\x01\x12\r\n\x05gamma\x18\x05 \x01(\x01\"]\n\x07Metrics\x12\x13\n\x0b\x61lpha_ratio\x18\x01 \x01(\x01\x12=\n\x10signal_integrity\x18\x02 \x01(\x0e\x32#.nnafa.telemetry.v1.SignalIntegrity*>\n\x0fSignalIntegrity\x12\x0b\n\x07UNKNOWN\x10\x00\x12\t\n\x05GREEN\x10\x01\x12\n\n\x06YELLOW\x10\x02\x12\x07\n\x03RED\x10\x03\x42\x15\xaa\x02\x12Nnafa.Telemetry.V1b\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -32,14 +32,14 @@ _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'telemetry_v1_pb2', _globals
 if not _descriptor._USE_C_DESCRIPTORS:
   _globals['DESCRIPTOR']._loaded_options = None
   _globals['DESCRIPTOR']._serialized_options = b'\252\002\022Nnafa.Telemetry.V1'
-  _globals['_SIGNALINTEGRITY']._serialized_start=745
-  _globals['_SIGNALINTEGRITY']._serialized_end=807
+  _globals['_SIGNALINTEGRITY']._serialized_start=827
+  _globals['_SIGNALINTEGRITY']._serialized_end=889
   _globals['_TELEMETRYPAYLOAD']._serialized_start=43
-  _globals['_TELEMETRYPAYLOAD']._serialized_end=496
-  _globals['_CHANNELS']._serialized_start=498
-  _globals['_CHANNELS']._serialized_end=561
-  _globals['_BANDPOWER']._serialized_start=563
-  _globals['_BANDPOWER']._serialized_end=648
-  _globals['_METRICS']._serialized_start=650
-  _globals['_METRICS']._serialized_end=743
+  _globals['_TELEMETRYPAYLOAD']._serialized_end=578
+  _globals['_CHANNELS']._serialized_start=580
+  _globals['_CHANNELS']._serialized_end=643
+  _globals['_BANDPOWER']._serialized_start=645
+  _globals['_BANDPOWER']._serialized_end=730
+  _globals['_METRICS']._serialized_start=732
+  _globals['_METRICS']._serialized_end=825
 # @@protoc_insertion_point(module_scope)

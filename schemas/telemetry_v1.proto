@@ -23,6 +23,10 @@ message TelemetryPayload {
   repeated double psd_tp10 = 12;
   
   Channels fir_channels = 13;
+  
+  float smoothed_alpha_ratio = 14;
+  float calibration_progress = 15;
+  float target_ratio = 16;
 }
 
 message Channels {

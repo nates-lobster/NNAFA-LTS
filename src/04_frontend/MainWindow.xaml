@@ -106,15 +106,43 @@
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,20,0,0" Grid.Row="0">
-                        <TextBlock Text="Live Alpha/Beta Ratio" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,20"/>
-                        <TextBlock x:Name="AlphaRatioText" Text="0.00" FontSize="72" FontWeight="Black" Foreground="#A6E3A1" HorizontalAlignment="Center"/>
-                        <ProgressBar x:Name="AlphaRatioBar" Width="400" Height="30" Minimum="0" Maximum="3" Value="0" Margin="0,20" Foreground="#A6E3A1" Background="#313244"/>
-                    </StackPanel>
                     
-                    <ScottPlot:WpfPlot x:Name="WpfPlotPSD_NFB" Grid.Row="1" Margin="20" PreviewMouseDown="WpfPlotPSD_PreviewMouseDown"/>
+                    <StackPanel HorizontalAlignment="Center" Margin="0,20,0,0" Grid.Row="0">
+                        <TextBlock Text="Smoothed Alpha/Beta Ratio" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                        <TextBlock x:Name="AlphaRatioText" Text="0.00" FontSize="72" FontWeight="Black" Foreground="#A6E3A1" HorizontalAlignment="Center"/>
+                        <TextBlock x:Name="TargetRatioText" Text="Target: 1.00" FontSize="18" Foreground="#89B4FA" HorizontalAlignment="Center"/>
+                        <ProgressBar x:Name="AlphaRatioBar" Width="400" Height="20" Minimum="0" Maximum="3" Value="0" Margin="0,10" Foreground="#A6E3A1" Background="#313244"/>
+                    </StackPanel>
+
+                    <!-- Calibration & Audio Tools -->
+                    <Border Grid.Row="1" Background="#313244" Padding="20" Margin="40,10" CornerRadius="10">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                                <TextBlock Text="Session Calibration" FontWeight="Bold" Margin="0,0,0,5"/>
+                                <Button x:Name="BtnCalibrate" Content="Start 30s Baseline" Click="BtnCalibrate_Click" Padding="10" Background="#89B4FA" Foreground="#11111B" FontWeight="Bold"/>
+                                <ProgressBar x:Name="PbCalibration" Height="10" Margin="0,10,0,0" Background="#1E1E2E"/>
+                            </StackPanel>
+                            
+                            <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                                <TextBlock Text="Audio Feedback" FontWeight="Bold" Margin="0,0,0,5"/>
+                                <StackPanel Orientation="Horizontal">
+                                    <Button x:Name="BtnSelectAudio" Content="Select File" Click="BtnSelectAudio_Click" Padding="5" Margin="0,0,5,0"/>
+                                    <TextBlock x:Name="TxtAudioFile" Text="No file selected" VerticalAlignment="Center" FontSize="12" Foreground="#A6ADC8"/>
+                                </StackPanel>
+                                <TextBlock x:Name="TxtVolume" Text="Volume: 0%" Margin="0,10,0,0" Foreground="#F9E2AF"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                    
+                    <ScottPlot:WpfPlot x:Name="WpfPlotPSD_NFB" Grid.Row="2" Margin="20" PreviewMouseDown="WpfPlotPSD_PreviewMouseDown"/>
                 </Grid>
             </TabItem>
 

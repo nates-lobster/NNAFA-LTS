@@ -51,6 +51,11 @@ namespace Frontend
         private ScottPlot.Plottables.Signal? _sigFir;
         private ScottPlot.Plottables.Signal? _sigIir;
 
+        // Neurofeedback Audio
+        private readonly MediaPlayer _mediaPlayer = new();
+        private double _targetVolume = 0;
+        private double _currentVolume = 0;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -266,6 +271,42 @@ namespace Frontend
                 TxtBeta.Text = payload.BandPower.Beta.ToString("F1");
                 TxtGamma.Text = payload.BandPower.Gamma.ToString("F1");
 
+                // Neurofeedback UI
+                double ratio = payload.SmoothedAlphaRatio;
+                AlphaRatioText.Text = ratio.ToString("F2");
+                AlphaRatioBar.Value = ratio;
+                TargetRatioText.Text = $"Target: {payload.TargetRatio:F2}";
+                PbCalibration.Value = payload.CalibrationProgress * 100;
+                
+                if (payload.CalibrationProgress > 0 && payload.CalibrationProgress < 1)
+                {
+                    BtnCalibrate.Content = "Calibrating...";
+                    BtnCalibrate.IsEnabled = false;
+                }
+                else
+                {
+                    BtnCalibrate.Content = "Start 30s Baseline";
+                    BtnCalibrate.IsEnabled = true;
+                }
+
+                // Audio Volume Logic
+                // If ratio >= target, volume = 0 (silent)
+                // If ratio < target, volume is proportional
+                if (ratio >= payload.TargetRatio)
+                {
+                    _targetVolume = 0;
+                }
+                else
+                {
+                    // Volume = Difference (clamped 0-1)
+                    _targetVolume = Math.Clamp(payload.TargetRatio - ratio, 0, 1);
+                }
+
+                // Smooth volume "slope"
+                _currentVolume = _currentVolume * 0.9 + _targetVolume * 0.1;
+                _mediaPlayer.Volume = _currentVolume;
+                TxtVolume.Text = $"Volume: {(_currentVolume * 100):F0}%";
+
                 AlphaRatioText.Text = payload.Metrics.AlphaRatio.ToString("F2");
                 AlphaRatioBar.Value = payload.Metrics.AlphaRatio;
 
@@ -409,6 +450,33 @@ namespace Frontend
             catch (Exception ex)
             {
                 MessageBox.Show($"Failed to kill Python processes: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private async void BtnCalibrate_Click(object sender, RoutedEventArgs e)
+        {
+            if (_telemetryClient == null) return;
+            var request = new Nnafa.State.V1.StateRequest
+            {
+                TargetState = Nnafa.State.V1.SystemState.StateCalibrating
+            };
+            await _telemetryClient.SendAsync(request.ToByteArray(), _cts.Token);
+        }
+
+        private void BtnSelectAudio_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new Microsoft.Win32.OpenFileDialog
+            {
+                Filter = "Audio Files|*.mp3;*.wav;*.m4a|All Files|*.*"
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                TxtAudioFile.Text = System.IO.Path.GetFileName(dialog.FileName);
+                _mediaPlayer.Open(new Uri(dialog.FileName));
+                _mediaPlayer.MediaEnded += (s, ev) => { _mediaPlayer.Position = TimeSpan.Zero; _mediaPlayer.Play(); }; // Loop
+                _mediaPlayer.Play();
+                _mediaPlayer.Volume = 0;
             }
         }
 
