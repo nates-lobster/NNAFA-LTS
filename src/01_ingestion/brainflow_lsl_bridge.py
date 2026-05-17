@@ -4,7 +4,13 @@ import numpy as np
 from brainflow.board_shim import BoardShim, BrainFlowInputParams, BoardIds
 from pylsl import StreamInfo, StreamOutlet, local_clock
 
+import sys
+
 def main():
+    # Force line-buffering on stdout/stderr to ensure real-time UI updates in C#
+    sys.stdout.reconfigure(line_buffering=True)
+    sys.stderr.reconfigure(line_buffering=True)
+
     parser = argparse.ArgumentParser(description="Brainflow to LSL Bridge for Muse 2/S")
     parser.add_argument('--board-id', type=int, 
                         help='Board ID. Muse 2 (Native): 38, Muse 2 (BLED): 22, Muse S (Native): 39, Muse S (BLED): 38', 

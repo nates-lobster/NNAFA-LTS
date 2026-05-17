@@ -541,8 +541,14 @@ namespace Frontend
             {
                 string provider = (ComboProvider.SelectedItem as ComboBoxItem)?.Content.ToString() ?? "";
                 string model = (ComboDeviceModel.SelectedItem as ComboBoxItem)?.Content.ToString() ?? "";
-                string venvPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..", "..", "venv", "Scripts", "python.exe");
-                string scriptPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..", "..", "src", "01_ingestion", "brainflow_lsl_bridge.py");
+                string? projectRoot = FindProjectRoot(AppDomain.CurrentDomain.BaseDirectory);
+                if (projectRoot == null)
+                {
+                    projectRoot = System.IO.Path.GetFullPath(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..", ".."));
+                }
+                
+                string venvPath = System.IO.Path.Combine(projectRoot, "venv", "Scripts", "python.exe");
+                string scriptPath = System.IO.Path.Combine(projectRoot, "src", "01_ingestion", "brainflow_lsl_bridge.py");
                 
                 // Normalize paths
                 venvPath = System.IO.Path.GetFullPath(venvPath);
@@ -587,7 +593,7 @@ namespace Frontend
                 ProcessStartInfo psi = new()
                 {
                     FileName = venvPath,
-                    Arguments = args,
+                    Arguments = $"-u {args}",
                     UseShellExecute = false,
                     CreateNoWindow = true,
                     RedirectStandardOutput = true,
@@ -670,6 +676,21 @@ namespace Frontend
             BtnToggleLsl.Background = (Brush)new BrushConverter().ConvertFrom("#A6E3A1")!;
             TxtLslStatus.Text = "Status: Idle";
             _lslProcess = null;
+        }
+
+        private static string? FindProjectRoot(string startDir)
+        {
+            string? currentDir = startDir;
+            while (!string.IsNullOrEmpty(currentDir))
+            {
+                if (System.IO.Directory.Exists(System.IO.Path.Combine(currentDir, "venv")) &&
+                    System.IO.Directory.Exists(System.IO.Path.Combine(currentDir, "src")))
+                {
+                    return currentDir;
+                }
+                currentDir = System.IO.Path.GetDirectoryName(currentDir);
+            }
+            return null;
         }
     }
 }
