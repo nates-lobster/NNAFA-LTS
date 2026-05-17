@@ -10,6 +10,7 @@ using ScottPlot;
 using ScottPlot.WPF;
 using Color = ScottPlot.Color;
 using Google.Protobuf;
+using System.Windows.Controls;
 
 namespace Frontend
 {
@@ -17,6 +18,7 @@ namespace Frontend
     {
         private readonly TelemetryClient _telemetryClient;
         private readonly CancellationTokenSource _cts = new();
+        private Process? _lslProcess;
         
         // Data buffers for ScottPlot
         private readonly double[] _tp9Data = new double[512];
@@ -419,9 +421,9 @@ namespace Frontend
             if (!IsLoaded || _sigRaw == null) return;
             
             _sigRaw.IsVisible = CbShowRaw.IsChecked == true;
-            _sigNotch.IsVisible = CbShowNotched.IsChecked == true;
-            _sigFir.IsVisible = CbShowFir.IsChecked == true;
-            _sigIir.IsVisible = CbShowIir.IsChecked == true;
+            if (_sigNotch != null) _sigNotch.IsVisible = CbShowNotched.IsChecked == true;
+            if (_sigFir != null) _sigFir.IsVisible = CbShowFir.IsChecked == true;
+            if (_sigIir != null) _sigIir.IsVisible = CbShowIir.IsChecked == true;
             
             WpfPlotOverlay.Refresh();
         }
@@ -518,6 +520,156 @@ namespace Frontend
         {
             _cts.Cancel();
             await _telemetryClient.DisconnectAsync();
+            StopLslStream();
+        }
+
+        private void BtnToggleLsl_Click(object sender, RoutedEventArgs e)
+        {
+            if (_lslProcess != null && !_lslProcess.HasExited)
+            {
+                StopLslStream();
+            }
+            else
+            {
+                StartLslStream();
+            }
+        }
+
+        private void StartLslStream()
+        {
+            try
+            {
+                string provider = (ComboProvider.SelectedItem as ComboBoxItem)?.Content.ToString() ?? "";
+                string model = (ComboDeviceModel.SelectedItem as ComboBoxItem)?.Content.ToString() ?? "";
+                string venvPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..", "..", "venv", "Scripts", "python.exe");
+                string scriptPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..", "..", "src", "01_ingestion", "brainflow_lsl_bridge.py");
+                
+                // Normalize paths
+                venvPath = System.IO.Path.GetFullPath(venvPath);
+                scriptPath = System.IO.Path.GetFullPath(scriptPath);
+
+                string args = "";
+
+                if (provider.Contains("BlueMuse"))
+                {
+                    // For BlueMuse, we just try to launch the app if it's installed.
+                    Process.Start(new ProcessStartInfo("bluemuse://") { UseShellExecute = true });
+                    TxtLslStatus.Text = "Status: Launched BlueMuse Protocol";
+                    return;
+                }
+                else if (provider.Contains("Synthetic"))
+                {
+                    args = $"\"{scriptPath}\" --board-id -1"; // SYNTHETIC_BOARD
+                }
+                else
+                {
+                    int boardId = 38; // Default: MUSE_2_BOARD
+                    if (provider.Contains("Native"))
+                    {
+                        if (model.Contains("Muse S")) boardId = 39; // MUSE_S_BOARD
+                        else if (model.Contains("Muse 2016")) boardId = 41; // MUSE_2016_BOARD
+                        else boardId = 38; // MUSE_2_BOARD
+                        
+                        args = $"\"{scriptPath}\" --board-id {boardId}";
+                        if (!string.IsNullOrEmpty(TxtMacAddr.Text)) args += $" --mac-address {TxtMacAddr.Text}";
+                    }
+                    else if (provider.Contains("BLED112"))
+                    {
+                        if (model.Contains("Muse S")) boardId = 21; // MUSE_S_BLED_BOARD
+                        else if (model.Contains("Muse 2016")) boardId = 42; // MUSE_2016_BLED_BOARD
+                        else boardId = 22; // MUSE_2_BLED_BOARD
+
+                        args = $"\"{scriptPath}\" --board-id {boardId} --serial-port {TxtComPort.Text}";
+                        if (!string.IsNullOrEmpty(TxtMacAddr.Text)) args += $" --mac-address {TxtMacAddr.Text}";
+                    }
+                }
+
+                ProcessStartInfo psi = new()
+                {
+                    FileName = venvPath,
+                    Arguments = args,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true
+                };
+
+                _lslProcess = new Process();
+                _lslProcess.StartInfo = psi;
+                _lslProcess.EnableRaisingEvents = true;
+
+                _lslProcess.OutputDataReceived += (s, ev) => 
+                {
+                    if (!string.IsNullOrEmpty(ev.Data) && ev.Data.Contains("[STATUS]"))
+                    {
+                        string status = ev.Data.Replace("[STATUS]", "").Trim();
+                        Dispatcher.Invoke(() => 
+                        {
+                            if (TxtLslStatus != null) TxtLslStatus.Text = $"Status: {status}";
+                            if (status == "CONNECTED")
+                            {
+                                BtnToggleLsl.Background = Brushes.LimeGreen;
+                            }
+                            else if (status.Contains("ERROR"))
+                            {
+                                BtnToggleLsl.Background = Brushes.Red;
+                            }
+                        });
+                    }
+                };
+
+                _lslProcess.ErrorDataReceived += (s, ev) => 
+                {
+                    if (!string.IsNullOrEmpty(ev.Data))
+                    {
+                        Dispatcher.Invoke(() => 
+                        {
+                            if (TxtLslStatus != null) 
+                            {
+                                TxtLslStatus.Text = $"Error: {ev.Data}";
+                            }
+                            BtnToggleLsl.Background = Brushes.Red;
+                        });
+                    }
+                };
+
+                _lslProcess.Start();
+                _lslProcess.BeginOutputReadLine();
+                _lslProcess.BeginErrorReadLine();
+
+                BtnToggleLsl.Content = "Stop LSL Stream";
+                BtnToggleLsl.Background = Brushes.Orange;
+                if (TxtLslStatus != null) TxtLslStatus.Text = "Status: Initializing...";
+                
+                // Monitor for exit
+                _lslProcess.Exited += (s, ev) => Dispatcher.Invoke(() => ResetLslUi());
+                _lslProcess.EnableRaisingEvents = true;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to start LSL Provider: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void StopLslStream()
+        {
+            try
+            {
+                if (_lslProcess != null && !_lslProcess.HasExited)
+                {
+                    _lslProcess.Kill(true);
+                }
+            }
+            catch { }
+            ResetLslUi();
+        }
+
+        private void ResetLslUi()
+        {
+            BtnToggleLsl.Content = "Start LSL Stream";
+            BtnToggleLsl.Background = (Brush)new BrushConverter().ConvertFrom("#A6E3A1")!;
+            TxtLslStatus.Text = "Status: Idle";
+            _lslProcess = null;
         }
     }
 }

@@ -240,6 +240,44 @@
                         <TextBlock Text="Port: 22345" FontSize="16" Foreground="#A6ADC8" Margin="0,0,0,10"/>
                         <Button Content="Connect LabRecorder" Margin="0,10" Padding="10" Background="#F9E2AF" Foreground="#11111B" FontWeight="Bold" BorderThickness="0"/>
                         
+                        <TextBlock Text="Hardware &amp; Connection" FontSize="20" FontWeight="Bold" Margin="0,30,0,10" Foreground="#89B4FA"/>
+                        <Border Background="#313244" Padding="15" CornerRadius="10">
+                            <StackPanel>
+                                <TextBlock Text="LSL Provider" Foreground="#A6ADC8" Margin="0,0,0,5"/>
+                                <ComboBox x:Name="ComboProvider" SelectedIndex="0" Background="#1E1E2E" Foreground="#CDD6F4" Padding="5">
+                                    <ComboBoxItem Content="BlueMuse (Default)"/>
+                                    <ComboBoxItem Content="Brainflow Native BLE"/>
+                                    <ComboBoxItem Content="Brainflow BLED112 Dongle"/>
+                                    <ComboBoxItem Content="Brainflow Synthetic (Emulator)"/>
+                                </ComboBox>
+
+                                <TextBlock Text="Device Model" Foreground="#A6ADC8" Margin="0,10,0,5"/>
+                                <ComboBox x:Name="ComboDeviceModel" SelectedIndex="0" Background="#1E1E2E" Foreground="#CDD6F4" Padding="5">
+                                    <ComboBoxItem Content="Muse 2 (Default)"/>
+                                    <ComboBoxItem Content="Muse S"/>
+                                    <ComboBoxItem Content="Muse 2016"/>
+                                </ComboBox>
+
+                                <Grid Margin="0,15,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0" Margin="0,0,5,0">
+                                        <TextBlock Text="COM Port (BLED)" FontSize="10" Foreground="#A6ADC8"/>
+                                        <TextBox x:Name="TxtComPort" Text="COM3" Background="#1E1E2E" Foreground="#CDD6F4" BorderBrush="#45475A" Padding="3"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1" Margin="5,0,0,0">
+                                        <TextBlock Text="MAC Address (Opt)" FontSize="10" Foreground="#A6ADC8"/>
+                                        <TextBox x:Name="TxtMacAddr" Text="" Background="#1E1E2E" Foreground="#CDD6F4" BorderBrush="#45475A" Padding="3"/>
+                                    </StackPanel>
+                                </Grid>
+
+                                <Button x:Name="BtnToggleLsl" Content="Start LSL Stream" Click="BtnToggleLsl_Click" Margin="0,15,0,0" Padding="10" Background="#A6E3A1" Foreground="#11111B" FontWeight="Bold" BorderThickness="0"/>
+                                <TextBlock x:Name="TxtLslStatus" Text="Status: Idle" FontSize="10" HorizontalAlignment="Center" Margin="0,5,0,0" Foreground="#A6ADC8"/>
+                            </StackPanel>
+                        </Border>
+
                         <TextBlock Text="Emergency Controls" FontSize="20" FontWeight="Bold" Margin="0,50,0,10" Foreground="#F38BA8"/>
                         <Button Content="Kill All Python" Click="KillPython_Click" Margin="0,10" Padding="10" Background="#F38BA8" Foreground="#11111B" FontWeight="Bold" BorderThickness="0"/>
                     </StackPanel>

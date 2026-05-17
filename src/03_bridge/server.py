@@ -2,6 +2,7 @@ import asyncio
 import websockets
 import sys
 import os
+import time
 
 base_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 sys.path.append(os.path.join(base_dir, 'src', '01_ingestion'))
@@ -56,23 +57,39 @@ async def listen_for_commands(websocket):
                 CALIBRATION_BUFFER = []
                 print("Starting 30s calibration...")
             
-            print(f"Command received. Mode: {CURRENT_MODE}, Calibrating: {IS_CALIBRATING}")
+            print(f"WS: Command received. Mode: {CURRENT_MODE}, Calibrating: {IS_CALIBRATING}")
     except Exception as e:
-        pass
+        print(f"WS: Error in command listener: {e}")
+
+async def lsl_connection_manager(stream):
+    while True:
+        if not stream.inlet:
+            try:
+                # Resolving stream in a background thread to avoid blocking the asyncio loop!
+                await asyncio.to_thread(stream.connect, timeout=1.0)
+            except Exception as e:
+                print(f"LSL Resolve Task error: {e}")
+        await asyncio.sleep(5.0)  # Retry resolution every 5 seconds
 
 async def eeg_loop(websocket):
     global CURRENT_MODE, RATIO_HISTORY, CALIBRATION_BUFFER, TARGET_RATIO, IS_CALIBRATING, CURRENT_SMOOTHING_S
     stream = lsl_stream.EEGStream(chunk_size=12)
     ring = buffer.RingBuffer(size=512, channels=4)
     last_data_time = time.time()
+    last_stall_warning = 0
     
-    print("Client connected. Waiting for EEG data...")
-    # Start command listener in background
+    print(f"WS: Client connected from {websocket.remote_address}. Waiting for EEG data...")
+    # Start command listener and LSL connection manager in background
     cmd_task = asyncio.create_task(listen_for_commands(websocket))
+    conn_task = asyncio.create_task(lsl_connection_manager(stream))
+    
+    last_heartbeat = time.time()
     
     try:
         while True:
             chunk, timestamps = stream.get_chunk()
+            payload = None
+            
             if chunk:
                 ring.append(chunk)
                 data = ring.get_data()
@@ -153,35 +170,55 @@ async def eeg_loop(websocket):
                             IS_CALIBRATING = False
                             print(f"Calibration complete. Target: {TARGET_RATIO:.2f}")
                     
-                    payload.target_ratio = TARGET_RATIO
-                else:
-                    # No data this tick, check if we've stalled
-                    is_stalled = (time.time() - last_data_time) > 2.0
-                    payload = telemetry_v1_pb2.TelemetryPayload()
-                    payload.is_stalled = is_stalled
-                
-                if payload.is_stalled:
-                    print("LSL stream stalled! Check BlueMuse.")
-
-                if metrics['signal_integrity'] == "GREEN":
+                    if metrics['signal_integrity'] == "GREEN":
                         payload.metrics.signal_integrity = telemetry_v1_pb2.GREEN
                     elif metrics['signal_integrity'] == "RED":
                         payload.metrics.signal_integrity = telemetry_v1_pb2.RED
                     else:
                         payload.metrics.signal_integrity = telemetry_v1_pb2.YELLOW
-                        
-                    await websocket.send(payload.SerializeToString())
-                    
+            
+            if payload is None:
+                # No data this tick, check if we've stalled
+                is_stalled = (time.time() - last_data_time) > 2.0
+                payload = telemetry_v1_pb2.TelemetryPayload()
+                payload.is_stalled = is_stalled
+                payload.timestamp_ms = stream.get_local_time() * 1000
+            
+            if payload.is_stalled:
+                now = time.time()
+                if now - last_stall_warning > 5.0:
+                    print("LSL: Stream stalled! Waiting for Muse stream...")
+                    last_stall_warning = now
+            
+            await websocket.send(payload.SerializeToString())
+            
+            # Heartbeat every 5 seconds
+            if time.time() - last_heartbeat > 5.0:
+                print(f"WS: Connection alive. Streaming at ~20Hz. Smoothing: {CURRENT_SMOOTHING_S}s")
+                last_heartbeat = time.time()
+                
             await asyncio.sleep(0.05) # Cap at ~20Hz updates
     except websockets.exceptions.ConnectionClosed:
         print("Client disconnected.")
     except Exception as e:
         print(f"Error in eeg loop: {e}")
+    finally:
+        cmd_task.cancel()
+        conn_task.cancel()
 
 async def main():
     print("Starting WebSocket server on port 8765...")
-    async with websockets.serve(eeg_loop, "127.0.0.1", 8765):
-        await asyncio.Future()  # run forever
+    try:
+        async with websockets.serve(eeg_loop, "127.0.0.1", 8765):
+            print("Server is listening. Ready for C# Frontend connection.")
+            await asyncio.Future()  # run forever
+    except OSError as e:
+        if e.errno == 10048:
+            print("\n[CRITICAL ERROR] Port 8765 is already in use.")
+            print("Action Required: An orphaned Python process is likely holding the port.")
+            print("Fix: Use the 'Kill All Python' button in the C# UI or run: taskkill /F /IM python.exe\n")
+        else:
+            print(f"Server startup error: {e}")
 
 if __name__ == "__main__":
     try:

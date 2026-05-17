@@ -15,14 +15,15 @@
 * **Calibration:** Added 30-second resting baseline calibration to calculate target ratios.
 * **Software Setup:** Installed R, RStudio, and Rtools to `M:\Muse Project\Software\` for research-grade data analysis.
 * **Data Flow:** Verified scrolling EEG waves and live FFT updates are functioning at ~10Hz refresh.
+* **Brainflow Integration:** Added `brainflow_lsl_bridge.py` as a robust alternative to BlueMuse. Supports Native BLE, BLED112, and Synthetic Emulator across Muse 2, S, and 2016.
+* **Asynchronous Connection Manager:** Ported Python server's LSL resolution to an asynchronous background worker thread, eliminating Event Loop blockages and preventing WebSocket command latencies.
 
 ## Short-Term Memory (Current Task State)
-* **Status:** System upgraded to V0.2.1 with FIR and Neurofeedback features on `neurofeedback` branch.
-* **FIR Denoise:** 129-tap linear phase filter successfully integrated into the bridge.
-* **Neurofeedback:** Audio volume loop and calibration system functional.
-* **Stall Detection:** Real-time "STALLED" indicator for Bluetooth/LSL drops.
-* **Known Issues:** 
-    *   BlueMuse/LSL can freeze; watchdog implemented to detect and alert.
-    *   WPF SkiaSharp warnings (NU1701) persist but are non-breaking.
-* **Planned:** Merge `neurofeedback` into `main` tomorrow.
+* **Status:** System upgraded to V0.2.2 with non-blocking connectivity, live status logs, and robust multi-device support.
+* **Non-blocking LSL:** Complete asynchronous self-healing loop resolves LSL streams in a background thread, preventing thread-blocking freezes.
+* **Multi-Device Support:** UI now offers full Board ID mappings for Muse 2, S, and 2016 (Native BLE and BLED112).
+* **Synthetic Emulator:** Added a hardware-free "Synthetic (Emulator)" provider that tests the entire ingestion, bridge, DSP, and C# visualization stack out of the box.
+* **Process Redirection:** WPF now captures and displays standard error and stdout of the Python bridge process directly in the UI status log, preventing silent startup failures.
+* **Replay & Test Hygiene:** Reinstalled and validated clean `brainflow` packages. Verified 0 compilation errors.
+
 
