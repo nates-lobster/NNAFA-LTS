@@ -51,7 +51,9 @@ def compute_band_powers(filtered_data):
     for band, (low, high) in bands.items():
         idx = np.logical_and(freqs >= low, freqs <= high)
         band_power = np.trapezoid(psd[idx], freqs[idx], axis=0)
-        powers[band] = np.mean(band_power) # Average across 4 channels
+        # Average only the frontal channels (AF7 and AF8, indices 1 and 2)
+        # to focus on prefrontal activity and exclude jaw/muscle artifacts from TP9/TP10.
+        powers[band] = np.mean(band_power[1:3])
         
     return powers, freqs, psd_avg, psd
 

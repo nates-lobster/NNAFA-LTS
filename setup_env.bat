@@ -10,7 +10,7 @@ echo.
 python --version >nul 2>&1
 if %errorlevel% neq 0 (
     echo [ERROR] Python is not installed or not in your system PATH.
-    echo Please install Python 3.11+ (64-bit) and check "Add Python to PATH" during installation.
+    echo Please install Python 3.11+ ^(64-bit^) and check "Add Python to PATH" during installation.
     echo Download link: https://www.python.org/downloads/
     echo.
     pause
@@ -19,7 +19,7 @@ if %errorlevel% neq 0 (
 
 :: Step 2: Create Virtual Environment if it doesn't exist
 if not exist "venv" (
-    echo Creating Python virtual environment (venv)...
+    echo Creating Python virtual environment ^(venv^)...
     python -m venv venv
     if !errorlevel! neq 0 (
         echo [ERROR] Failed to create virtual environment.
@@ -28,7 +28,7 @@ if not exist "venv" (
     )
     echo Virtual environment created successfully.
 ) else (
-    echo Virtual environment (venv) already exists. Skipping creation.
+    echo Virtual environment ^(venv^) already exists. Skipping creation.
 )
 echo.
 

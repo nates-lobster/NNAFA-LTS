@@ -3,6 +3,7 @@ import websockets
 import sys
 import os
 import time
+import logging
 
 base_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 sys.path.append(os.path.join(base_dir, 'src', '01_ingestion'))
@@ -15,6 +16,18 @@ import dsp
 import telemetry_v1_pb2
 import state_v1_pb2
 from collections import deque
+
+# Configure centralized logger
+log_file = os.path.join(base_dir, "brainflow_bridge.log")
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s [%(levelname)s] (%(filename)s:%(lineno)d) - %(message)s',
+    handlers=[
+        logging.FileHandler(log_file, mode='w', encoding='utf-8'),
+        logging.StreamHandler(sys.stdout)
+    ]
+)
+logger = logging.getLogger("server")
 
 # Global settings and state
 CURRENT_MODE = "BOTH"
@@ -49,26 +62,27 @@ async def listen_for_commands(websocket):
                 global RATIO_HISTORY, CALIBRATION_BUFFER
                 RATIO_HISTORY.clear()
                 CALIBRATION_BUFFER = []
-                print("Session buffers reset.")
+                logger.info("Session buffers reset by request.")
             
             # State transitions
             if request.target_state == state_v1_pb2.STATE_CALIBRATING:
                 IS_CALIBRATING = True
                 CALIBRATION_BUFFER = []
-                print("Starting 30s calibration...")
+                logger.info("Starting 30s calibration phase...")
             
-            print(f"WS: Command received. Mode: {CURRENT_MODE}, Calibrating: {IS_CALIBRATING}")
+            logger.info(f"WS Command processed: mode={CURRENT_MODE}, smoothing_window_s={CURRENT_SMOOTHING_S}, reset_buffers={request.settings.reset_buffers}, target_state={request.target_state}")
     except Exception as e:
-        print(f"WS: Error in command listener: {e}")
+        logger.exception("WS: Error in command listener:")
 
 async def lsl_connection_manager(stream):
     while True:
         if not stream.inlet:
             try:
                 # Resolving stream in a background thread to avoid blocking the asyncio loop!
+                logger.info("LSL Connection Manager: Attempting stream resolution...")
                 await asyncio.to_thread(stream.connect, timeout=1.0)
             except Exception as e:
-                print(f"LSL Resolve Task error: {e}")
+                logger.exception("LSL Connection Manager: Resolve task error:")
         await asyncio.sleep(5.0)  # Retry resolution every 5 seconds
 
 async def eeg_loop(websocket):
@@ -78,7 +92,7 @@ async def eeg_loop(websocket):
     last_data_time = time.time()
     last_stall_warning = 0
     
-    print(f"WS: Client connected from {websocket.remote_address}. Waiting for EEG data...")
+    logger.info(f"WS: Client connected from {websocket.remote_address}. Waiting for EEG data...")
     # Start command listener and LSL connection manager in background
     cmd_task = asyncio.create_task(listen_for_commands(websocket))
     conn_task = asyncio.create_task(lsl_connection_manager(stream))
@@ -104,7 +118,12 @@ async def eeg_loop(websocket):
                     # Create Protobuf Payload
                     payload = telemetry_v1_pb2.TelemetryPayload()
                     payload.is_stalled = False
-                    payload.timestamp_ms = stream.get_local_time() * 1000
+                    
+                    # Use precise LSL hardware timestamp corresponding to the latest sample in the chunk
+                    if timestamps and len(timestamps) > 0:
+                        payload.timestamp_ms = timestamps[-1] * 1000.0
+                    else:
+                        payload.timestamp_ms = stream.get_local_time() * 1000.0
                     
                     # Use latest filtered sample for "clean" channel data
                     payload.channels.tp9 = filtered[-1, 0]
@@ -168,7 +187,7 @@ async def eeg_loop(websocket):
                             # Target = Mean + 0.1 (make it slightly harder than baseline)
                             TARGET_RATIO = sum(CALIBRATION_BUFFER) / len(CALIBRATION_BUFFER) + 0.1
                             IS_CALIBRATING = False
-                            print(f"Calibration complete. Target: {TARGET_RATIO:.2f}")
+                            logger.info(f"Calibration complete. Target: {TARGET_RATIO:.2f}")
                     
                     if metrics['signal_integrity'] == "GREEN":
                         payload.metrics.signal_integrity = telemetry_v1_pb2.GREEN
@@ -187,41 +206,43 @@ async def eeg_loop(websocket):
             if payload.is_stalled:
                 now = time.time()
                 if now - last_stall_warning > 5.0:
-                    print("LSL: Stream stalled! Waiting for Muse stream...")
+                    logger.warning("LSL: Stream stalled! Waiting for Muse stream...")
                     last_stall_warning = now
             
+            payload.target_ratio = TARGET_RATIO
             await websocket.send(payload.SerializeToString())
             
             # Heartbeat every 5 seconds
             if time.time() - last_heartbeat > 5.0:
-                print(f"WS: Connection alive. Streaming at ~20Hz. Smoothing: {CURRENT_SMOOTHING_S}s")
+                logger.debug(f"WS: Connection alive. Streaming at ~20Hz. Smoothing: {CURRENT_SMOOTHING_S}s")
                 last_heartbeat = time.time()
                 
             await asyncio.sleep(0.05) # Cap at ~20Hz updates
     except websockets.exceptions.ConnectionClosed:
-        print("Client disconnected.")
+        logger.info("WS Client disconnected.")
     except Exception as e:
-        print(f"Error in eeg loop: {e}")
+        logger.exception("Error in eeg loop:")
     finally:
         cmd_task.cancel()
         conn_task.cancel()
 
 async def main():
-    print("Starting WebSocket server on port 8765...")
+    logger.info("Starting WebSocket server on port 8765...")
     try:
         async with websockets.serve(eeg_loop, "127.0.0.1", 8765):
-            print("Server is listening. Ready for C# Frontend connection.")
+            logger.info("Server is listening. Ready for C# Frontend connection.")
             await asyncio.Future()  # run forever
     except OSError as e:
         if e.errno == 10048:
-            print("\n[CRITICAL ERROR] Port 8765 is already in use.")
-            print("Action Required: An orphaned Python process is likely holding the port.")
-            print("Fix: Use the 'Kill All Python' button in the C# UI or run: taskkill /F /IM python.exe\n")
+            logger.critical("\n[CRITICAL ERROR] Port 8765 is already in use.")
+            logger.critical("Action Required: An orphaned Python process is likely holding the port.")
+            logger.critical("Fix: Use the 'Kill All Python' button in the C# UI or run: taskkill /F /IM python.exe\n")
         else:
-            print(f"Server startup error: {e}")
+            logger.exception("Server startup error:")
 
 if __name__ == "__main__":
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
-        print("Server shutting down gracefully.")
+        logger.info("Server shutting down gracefully.")
+

@@ -1,4 +1,7 @@
 import pylsl
+import logging
+
+logger = logging.getLogger("lsl_stream")
 
 class EEGStream:
     def __init__(self, stream_name="Muse", chunk_size=12):
@@ -7,17 +10,23 @@ class EEGStream:
         self.inlet = None
         
     def connect(self, timeout=1.0):
-        print(f"LSL: Resolving '{self.stream_name}' stream (type: EEG)...")
+        logger.info(f"LSL: Resolving '{self.stream_name}' stream (type: EEG)...")
         try:
-            streams = pylsl.resolve_byprop('type', 'EEG', timeout=timeout)
+            # First try resolving by the exact stream name
+            streams = pylsl.resolve_byprop('name', self.stream_name, timeout=timeout)
             if not streams:
-                print(f"LSL: No '{self.stream_name}' stream found.")
+                logger.warning(f"LSL: No stream named '{self.stream_name}' found. Trying fallback to type 'EEG'...")
+                streams = pylsl.resolve_byprop('type', 'EEG', timeout=timeout)
+                
+            if not streams:
+                logger.error("LSL: No EEG stream found on the network.")
                 return False
+                
             self.inlet = pylsl.StreamInlet(streams[0], max_chunklen=self.chunk_size)
-            print(f"LSL: Connected to stream '{streams[0].name()}' at {streams[0].nominal_srate()}Hz.")
+            logger.info(f"LSL: Connected to stream '{streams[0].name()}' (type: '{streams[0].type()}') at {streams[0].nominal_srate()}Hz.")
             return True
         except Exception as e:
-            print(f"LSL: Error during resolution: {e}")
+            logger.exception("LSL: Error during stream resolution:")
             return False
         
     def get_chunk(self):
@@ -26,15 +35,16 @@ class EEGStream:
         try:
             chunk, timestamps = self.inlet.pull_chunk(timeout=0.0, max_samples=self.chunk_size)
             
-            # BlueMuse broadcasts a 5th AUX channel. We only need the first 4 (TP9, AF7, AF8, TP10).
+            # BlueMuse/Brainflow might broadcast an AUX channel. We only need the first 4 (TP9, AF7, AF8, TP10).
             if chunk and len(chunk[0]) > 4:
                 chunk = [sample[:4] for sample in chunk]
                 
             return chunk, timestamps
         except Exception as e:
-            print(f"LSL: Error pulling chunk: {e}")
+            logger.exception("LSL: Error pulling chunk:")
             self.inlet = None
             return None, None
         
     def get_local_time(self):
         return pylsl.local_clock()
+

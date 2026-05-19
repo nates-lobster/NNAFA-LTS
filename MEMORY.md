@@ -18,12 +18,21 @@
 * **Brainflow Integration:** Added `brainflow_lsl_bridge.py` as a robust alternative to BlueMuse. Supports Native BLE, BLED112, and Synthetic Emulator across Muse 2, S, and 2016.
 * **Asynchronous Connection Manager:** Ported Python server's LSL resolution to an asynchronous background worker thread, eliminating Event Loop blockages and preventing WebSocket command latencies.
 
-## Short-Term Memory (Current Task State)
-* **Status:** System upgraded to V0.2.2 with non-blocking connectivity, live status logs, and robust multi-device support.
-* **Non-blocking LSL:** Complete asynchronous self-healing loop resolves LSL streams in a background thread, preventing thread-blocking freezes.
-* **Multi-Device Support:** UI now offers full Board ID mappings for Muse 2, S, and 2016 (Native BLE and BLED112).
-* **Synthetic Emulator:** Added a hardware-free "Synthetic (Emulator)" provider that tests the entire ingestion, bridge, DSP, and C# visualization stack out of the box.
-* **Process Redirection:** WPF now captures and displays standard error and stdout of the Python bridge process directly in the UI status log, preventing silent startup failures.
-* **Replay & Test Hygiene:** Reinstalled and validated clean `brainflow` packages. Verified 0 compilation errors.
+## Short-Term Memory (Task State & Upgrades)
+* **Status:** Upgraded backend to V0.2.5 with calibration fixes, stdout status flush configuration, and native Brainflow logging redirection.
+* **Bug Fixes:**
+  - Resolved `brainflow_lsl_bridge.py` zero-sample drop by replacing `data.any()` with `data.shape[1] > 0`.
+  - Prevented Bluetooth connection locks by catching system signals (`SIGINT`, `SIGTERM`, `SIGBREAK`) for graceful session release.
+  - Hardened LSL receiver stream resolution in `lsl_stream.py` to target named `"Muse"` streams, falling back to type `"EEG"`.
+  - Preserved precise LSL hardware timestamps, eliminating processing jitter.
+  - **Fixed UI Native BLE Error Bug:** Configured `BoardShim.set_log_file("brainflow_native.log")` in `brainflow_lsl_bridge.py` to redirect all native Brainflow C++ trace logs away from `sys.stderr`, preventing the C# frontend from incorrectly intercepting them as fatal connection errors.
+  - **Fixed UI Status Buffer Bug:** Re-added line-buffering to Python stdout/stderr (`sys.stdout.reconfigure(line_buffering=True)`) and forced `flush=True` on all printed status lines to ensure they are received instantly by the C# UI pipe, resolving the frozen "Initializing" indicator.
+  - **Fixed Neurofeedback Target Calibration Bug:** Fixed the issue where target ratio was constantly locked to `0.0` in the C# frontend by assigning the calculated `TARGET_RATIO` to `payload.target_ratio` in Python `server.py` before broadcasting the telemetry payload.
+* **Developer Log Hygiene & Archiver:**
+  - Configured `server.py` to launch with `mode='w'`, automatically truncating and clearing the log file on every fresh application startup to keep logs short and token-friendly.
+  - Bridge uses `mode='a'` to append seamlessly without overwriting server logs.
+  - Created `scratch/manage_logs.py` allowing developers to manually status-check, clear, or archive log files to a timestamped roll (`logs/archive/`) at any time.
+
+
 
 
