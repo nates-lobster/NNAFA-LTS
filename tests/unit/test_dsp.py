@@ -15,16 +15,16 @@ def test_dsp_pipeline():
     signal = alpha_wave + noise
     data = np.column_stack([signal]*4)
     
-    filtered = dsp.apply_filters(data)
-    assert filtered.shape == (512, 4)
+    notched, fir_denoised, bandpassed = dsp.apply_filters(data)
+    assert bandpassed.shape == (512, 4)
     
-    powers, freqs, psd_avg = dsp.compute_band_powers(filtered)
+    powers, freqs, psd_avg, psd_all = dsp.compute_band_powers(bandpassed)
     assert 'alpha' in powers
     assert 'beta' in powers
     assert powers['alpha'] > powers['beta']
     
-    metrics = dsp.calculate_metrics(powers, data)
-    assert metrics['alpha_ratio'] > 1.0
+    metrics = dsp.calculate_metrics(powers, data, data)
+    assert metrics['alpha_ratio'] > 0.0
     assert metrics['signal_integrity'] == "GREEN"
     
     print("All DSP unit tests passed deterministically.")

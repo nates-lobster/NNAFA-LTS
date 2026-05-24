@@ -2,287 +2,734 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:ScottPlot="clr-namespace:ScottPlot.WPF;assembly=ScottPlot.WPF"
-        Title="NNAFA V0.2 LTS" Height="800" Width="1200"
+        Title="NNAFA V0.2 LTS - Neurofeedback Dashboard" Height="820" Width="1350"
         Background="#1E1E2E" Foreground="#CDD6F4"
-        Loaded="Window_Loaded" Closing="Window_Closing">
-    <Grid Background="#1E1E2E">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+        Loaded="Window_Loaded" Closing="Window_Closing"
+        WindowStartupLocation="CenterScreen">
+    
+    <Window.Resources>
+        <!-- Modern Sidebar RadioButton/Tab Style -->
+        <Style x:Key="SidebarButtonStyle" TargetType="RadioButton">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border Name="Border" Background="Transparent" CornerRadius="8" Padding="15,14" Margin="0,4">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <!-- Left Active indicator line -->
+                                <Rectangle Name="Indicator" Grid.Column="0" Width="4" Height="18" Fill="#89B4FA" Margin="0,0,12,0" RadiusX="2" RadiusY="2" Visibility="Collapsed"/>
+                                <ContentPresenter Name="ContentPresenter" Grid.Column="1" VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="#313244"/>
+                                <Setter Property="Foreground" Value="#89B4FA"/>
+                                <Setter Property="Cursor" Value="Hand"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="#181825"/>
+                                <Setter TargetName="Indicator" Property="Visibility" Value="Visible"/>
+                                <Setter Property="Foreground" Value="#89B4FA"/>
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Foreground" Value="#CDD6F4"/>
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
         
-        <!-- Persistent Top Bar -->
-        <Border Grid.Row="0" Background="#313244" Padding="15" Margin="0,0,0,5">
+        <!-- Nested TabControl Header Style (Minimalistic Sub-Tabs) -->
+        <Style x:Key="SubTabItemStyle" TargetType="TabItem">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabItem">
+                        <Border Name="Border" BorderThickness="0,0,0,3" BorderBrush="Transparent" Padding="16,10" Margin="4,0">
+                            <ContentPresenter ContentSource="Header" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Border" Property="BorderBrush" Value="#89B4FA"/>
+                                <Setter Property="Foreground" Value="#89B4FA"/>
+                                <Setter Property="FontWeight" Value="Bold"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Foreground" Value="#89B4FA"/>
+                                <Setter Property="Cursor" Value="Hand"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Foreground" Value="#A6ADC8"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid Background="#1E1E2E">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="230"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        
+        <!-- ==================== SIDEBAR ==================== -->
+        <Border Grid.Column="0" Background="#11111B" BorderThickness="0,0,1,0" BorderBrush="#313244">
             <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/> <!-- Title / Logo -->
+                    <RowDefinition Height="*"/>    <!-- Navigation Links -->
+                    <RowDefinition Height="Auto"/> <!-- Footer / Version Info -->
+                </Grid.RowDefinitions>
                 
-                <!-- Integrity -->
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="Signal Status: " FontSize="18" FontWeight="Bold" Foreground="#CDD6F4"/>
-                    <TextBlock x:Name="TxtStatus" Text="WAITING" FontSize="18" FontWeight="Bold" Foreground="Gray" Margin="5,0"/>
-                    <Ellipse x:Name="IntegrityLight" Width="20" Height="20" Fill="Gray" Margin="10,0"/>
-                    <TextBlock x:Name="TxtStalled" Text="STALLED" Foreground="#F38BA8" FontWeight="Bold" Margin="15,0,0,0" Visibility="Collapsed" VerticalAlignment="Center"/>
+                <!-- Logo & Brand Header -->
+                <StackPanel Grid.Row="0" Margin="20,30,20,30">
+                    <TextBlock Text="MUSE NNAFA" FontSize="26" FontWeight="Black" HorizontalAlignment="Center">
+                        <TextBlock.Foreground>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                <GradientStop Color="#89B4FA" Offset="0.0"/>
+                                <GradientStop Color="#CBA6F7" Offset="1.0"/>
+                            </LinearGradientBrush>
+                        </TextBlock.Foreground>
+                    </TextBlock>
+                    <TextBlock Text="COGNITIVE FEEDBACK HUB" FontSize="9" FontWeight="Bold" Foreground="#A6ADC8" HorizontalAlignment="Center" Margin="0,6,0,0"/>
                 </StackPanel>
                 
-                <!-- Power Levels -->
-                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="δ (1-4Hz): " Foreground="#CDD6F4" VerticalAlignment="Center"/>
-                    <TextBlock x:Name="TxtDelta" Text="0.0" Width="40" Foreground="#A6ADC8" Margin="0,0,10,0" FontWeight="Bold"/>
-                    <TextBlock Text="θ (4-8Hz): " Foreground="#CDD6F4" VerticalAlignment="Center"/>
-                    <TextBlock x:Name="TxtTheta" Text="0.0" Width="40" Foreground="#A6ADC8" Margin="0,0,10,0" FontWeight="Bold"/>
-                    <TextBlock Text="α (8-12Hz): " Foreground="#CDD6F4" VerticalAlignment="Center"/>
-                    <TextBlock x:Name="TxtAlpha" Text="0.0" Width="40" Foreground="#A6ADC8" Margin="0,0,10,0" FontWeight="Bold"/>
-                    <TextBlock Text="β (12-30Hz): " Foreground="#CDD6F4" VerticalAlignment="Center"/>
-                    <TextBlock x:Name="TxtBeta" Text="0.0" Width="40" Foreground="#A6ADC8" Margin="0,0,10,0" FontWeight="Bold"/>
-                    <TextBlock Text="γ (30-40Hz): " Foreground="#CDD6F4" VerticalAlignment="Center"/>
-                    <TextBlock x:Name="TxtGamma" Text="0.0" Width="40" Foreground="#A6ADC8" FontWeight="Bold"/>
+                <!-- Navigation Options (Toggles Top-level Hidden TabControl) -->
+                <StackPanel Grid.Row="1" Margin="10,0">
+                    <RadioButton x:Name="BtnNavMonitor" Style="{StaticResource SidebarButtonStyle}" Content="Live EEG Monitor" IsChecked="True" Click="NavButton_Click" Tag="0"/>
+                    <RadioButton x:Name="BtnNavNFB" Style="{StaticResource SidebarButtonStyle}" Content="Neurofeedback" Click="NavButton_Click" Tag="1"/>
+                    <RadioButton x:Name="BtnNavChallenges" Style="{StaticResource SidebarButtonStyle}" Content="Cognitive Tasks" Click="NavButton_Click" Tag="2"/>
+                    <RadioButton x:Name="BtnNavDiagnostics" Style="{StaticResource SidebarButtonStyle}" Content="System &amp; Diagnostics" Click="NavButton_Click" Tag="3"/>
+                </StackPanel>
+                
+                <!-- Sidebar Footer -->
+                <StackPanel Grid.Row="2" Margin="20" HorizontalAlignment="Center">
+                    <TextBlock Text="System Version" FontSize="9" Foreground="#585B70" HorizontalAlignment="Center"/>
+                    <TextBlock Text="v0.3.0 WORKING" FontSize="10" FontWeight="SemiBold" Foreground="#A6ADC8" HorizontalAlignment="Center" Margin="0,2,0,0"/>
                 </StackPanel>
             </Grid>
         </Border>
-
-        <TabControl Grid.Row="1" Background="#1E1E2E" BorderThickness="0" Margin="10">
-            <TabControl.Resources>
-                <Style TargetType="TabItem">
-                    <Setter Property="Template">
-                        <Setter.Value>
-                            <ControlTemplate TargetType="TabItem">
-                                <Border Name="Border" BorderThickness="0,0,0,2" BorderBrush="Transparent" Margin="2,0">
-                                    <ContentPresenter x:Name="ContentSite"
-                                        VerticalAlignment="Center"
-                                        HorizontalAlignment="Center"
-                                        ContentSource="Header"
-                                        Margin="10,2"/>
-                                </Border>
-                                <ControlTemplate.Triggers>
-                                    <Trigger Property="IsSelected" Value="True">
-                                        <Setter TargetName="Border" Property="BorderBrush" Value="#89B4FA"/>
-                                        <Setter Property="Foreground" Value="#89B4FA"/>
-                                    </Trigger>
-                                </ControlTemplate.Triggers>
-                            </ControlTemplate>
-                        </Setter.Value>
-                    </Setter>
-                    <Setter Property="Foreground" Value="#CDD6F4"/>
-                    <Setter Property="FontSize" Value="16"/>
-                    <Setter Property="Padding" Value="10,5"/>
-                </Style>
-            </TabControl.Resources>
-
-            <!-- Monitoring Tab -->
-            <TabItem Header="Monitoring">
+        
+        <!-- ==================== MAIN CONTENT AREA ==================== -->
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/> <!-- Global Signal Top Bar -->
+                <RowDefinition Height="*"/>    <!-- Selected Dashboard Panel -->
+            </Grid.RowDefinitions>
+            
+            <!-- Global Signal Top Bar -->
+            <Border Grid.Row="0" Background="#181825" Padding="15,12" Margin="10,10,10,0" CornerRadius="10" BorderThickness="1" BorderBrush="#313244">
                 <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="2*"/>
-                        <RowDefinition Height="1*"/>
-                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
                     
-                    <UniformGrid Rows="2" Columns="2" Grid.Row="0" Margin="10">
-                        <ScottPlot:WpfPlot x:Name="WpfPlotAF7" Margin="5"/>
-                        <ScottPlot:WpfPlot x:Name="WpfPlotAF8" Margin="5"/>
-                        <ScottPlot:WpfPlot x:Name="WpfPlotTP9" Margin="5"/>
-                        <ScottPlot:WpfPlot x:Name="WpfPlotTP10" Margin="5"/>
-                    </UniformGrid>
+                    <!-- Signal Integrity Status -->
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Grid.Column="0">
+                        <TextBlock Text="Signal Status: " FontSize="14" FontWeight="Bold" Foreground="#CDD6F4"/>
+                        <TextBlock x:Name="TxtStatus" Text="WAITING" FontSize="14" FontWeight="Black" Foreground="Gray" Margin="5,0"/>
+                        <Ellipse x:Name="IntegrityLight" Width="14" Height="14" Fill="Gray" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="TxtStalled" Text="STALLED" Foreground="#F38BA8" FontSize="14" FontWeight="Black" Margin="15,0,0,0" Visibility="Collapsed" VerticalAlignment="Center"/>
+                    </StackPanel>
                     
-                    <Grid Grid.Row="1" Margin="15,5">
+                    <!-- Power Band Metrics -->
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="δ (1-4Hz): " Foreground="#89B4FA" FontSize="12" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="TxtDelta" Text="0.0" Width="38" Foreground="#CDD6F4" Margin="0,0,8,0" FontWeight="Bold" FontSize="13"/>
+                        <TextBlock Text="θ (4-8Hz): " Foreground="#CBA6F7" FontSize="12" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="TxtTheta" Text="0.0" Width="38" Foreground="#CDD6F4" Margin="0,0,8,0" FontWeight="Bold" FontSize="13"/>
+                        <TextBlock Text="α (8-12Hz): " Foreground="#A6E3A1" FontSize="12" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="TxtAlpha" Text="0.0" Width="38" Foreground="#CDD6F4" Margin="0,0,8,0" FontWeight="Bold" FontSize="13"/>
+                        <TextBlock Text="β (12-30Hz): " Foreground="#74C7EC" FontSize="12" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="TxtBeta" Text="0.0" Width="38" Foreground="#CDD6F4" Margin="0,0,8,0" FontWeight="Bold" FontSize="13"/>
+                        <TextBlock Text="γ (30-40Hz): " Foreground="#F9E2AF" FontSize="12" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="TxtGamma" Text="0.0" Width="38" Foreground="#CDD6F4" FontWeight="Bold" FontSize="13"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+            
+            <!-- Hidden-Header Main TabControl switched via Sidebar -->
+            <TabControl x:Name="MainTabControl" Grid.Row="1" Background="#1E1E2E" BorderThickness="0" Margin="10,5,10,10">
+                <TabControl.ItemContainerStyle>
+                    <Style TargetType="TabItem">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                    </Style>
+                </TabControl.ItemContainerStyle>
+                
+                <!-- ==================== 1. LIVE EEG MONITOR SECTION ==================== -->
+                <TabItem Header="Live EEG Monitor">
+                    <Grid>
+                        <TabControl Background="#1E1E2E" BorderThickness="0">
+                            <!-- 1a. Raw Waveforms -->
+                            <TabItem Header="Live Sensor Channels" Style="{StaticResource SubTabItemStyle}">
+                                <Grid Margin="5">
+                                    <UniformGrid Rows="2" Columns="2">
+                                        <ScottPlot:WpfPlot x:Name="WpfPlotAF7" Margin="4"/>
+                                        <ScottPlot:WpfPlot x:Name="WpfPlotAF8" Margin="4"/>
+                                        <ScottPlot:WpfPlot x:Name="WpfPlotTP9" Margin="4"/>
+                                        <ScottPlot:WpfPlot x:Name="WpfPlotTP10" Margin="4"/>
+                                    </UniformGrid>
+                                </Grid>
+                            </TabItem>
+                            
+                            <!-- 1b. Spectrogram -->
+                            <TabItem Header="Live Spectrogram" Style="{StaticResource SubTabItemStyle}">
+                                <Grid Margin="10">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,5">
+                                        <TextBlock Text="Prefrontal Frequency Spectrogram (AF7 &amp; AF8, 0-40 Hz)" FontSize="15" FontWeight="Bold" HorizontalAlignment="Center" Foreground="#89B4FA" VerticalAlignment="Center" Margin="0,0,15,0"/>
+                                        <TextBlock Text="View Mode:" Foreground="#A6ADC8" VerticalAlignment="Center" Margin="0,0,8,0" FontSize="12"/>
+                                        <ComboBox x:Name="ComboSpectroMode" Width="180" Padding="6,4" SelectedIndex="0" SelectionChanged="ComboPsdMode_SelectionChanged" Background="#1E1E2E" Foreground="#CDD6F4" BorderBrush="#45475A" FontSize="12">
+                                            <ComboBoxItem Content="Log"/>
+                                            <ComboBoxItem Content="Relative"/>
+                                        </ComboBox>
+                                    </StackPanel>
+                                    <ScottPlot:WpfPlot x:Name="WpfPlotSpectrogram" Grid.Row="1" Margin="5"/>
+                                </Grid>
+                            </TabItem>
+                            
+                            <!-- 1c. Live PSD -->
+                            <TabItem Header="Power Spectral Density (PSD)" Style="{StaticResource SubTabItemStyle}">
+                                <Grid Margin="10">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,15,5" Panel.ZIndex="1">
+                                        <TextBlock Text="PSD View Mode:" Foreground="#A6ADC8" VerticalAlignment="Center" Margin="0,0,8,0" FontSize="12"/>
+                                        <ComboBox x:Name="ComboPsdMode" Width="200" Padding="6,4" SelectedIndex="0" SelectionChanged="ComboPsdMode_SelectionChanged" Background="#1E1E2E" Foreground="#CDD6F4" BorderBrush="#45475A" FontSize="12">
+                                            <ComboBoxItem Content="Log"/>
+                                            <ComboBoxItem Content="Relative"/>
+                                        </ComboBox>
+                                    </StackPanel>
+                                    <ScottPlot:WpfPlot x:Name="WpfPlotPSD_Monitor" Grid.Row="1" PreviewMouseDown="WpfPlotPSD_PreviewMouseDown"/>
+                                </Grid>
+                            </TabItem>
+                            
+                            <!-- 1d. Waveform History -->
+                            <TabItem Header="Historical Trend Waves" Style="{StaticResource SubTabItemStyle}">
+                                <Grid Margin="10">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="Brainwave Amplitude History (Last 30 seconds)" FontSize="15" FontWeight="Bold" Margin="0,0,0,10" HorizontalAlignment="Center" Foreground="#89B4FA"/>
+                                    <ScottPlot:WpfPlot x:Name="WpfPlotHistory" Grid.Row="1" Margin="5"/>
+                                </Grid>
+                            </TabItem>
+                        </TabControl>
+                    </Grid>
+                </TabItem>
+                
+                <!-- ==================== 2. NEUROFEEDBACK SECTION ==================== -->
+                <TabItem Header="Neurofeedback">
+                    <Grid Margin="5">
                         <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,10,0" Panel.ZIndex="1">
-                            <TextBlock Text="PSD View: " Foreground="#A6ADC8" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                            <RadioButton x:Name="RbStandard" Content="Standard" IsChecked="True" Foreground="#CDD6F4" Margin="0,0,10,0" VerticalAlignment="Center" Checked="RbScale_Checked"/>
-                            <RadioButton x:Name="RbCompensated" Content="Compensated (1/f)" Foreground="#CDD6F4" VerticalAlignment="Center" Checked="RbScale_Checked"/>
+                        
+                        <!-- Ratio display and feedback metrics -->
+                        <StackPanel HorizontalAlignment="Center" Margin="0,15,0,15" Grid.Row="0">
+                            <TextBlock Text="Smoothed Alpha / Beta Focus Ratio" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,5" Foreground="#CDD6F4"/>
+                            <TextBlock x:Name="AlphaRatioText" Text="0.00" FontSize="64" FontWeight="Black" Foreground="#A6E3A1" HorizontalAlignment="Center"/>
+                            <TextBlock x:Name="TargetRatioText" Text="Target Threshold: 1.00" FontSize="14" Foreground="#89B4FA" HorizontalAlignment="Center" Margin="0,2,0,5"/>
+                            <ProgressBar x:Name="AlphaRatioBar" Width="500" Height="16" Minimum="0" Maximum="3" Value="0" Margin="0,5" Foreground="#A6E3A1" Background="#313244" BorderThickness="0"/>
                         </StackPanel>
-                        <ScottPlot:WpfPlot x:Name="WpfPlotPSD_Monitor" Grid.Row="1" PreviewMouseDown="WpfPlotPSD_PreviewMouseDown"/>
-                    </Grid>
-                </Grid>
-            </TabItem>
-
-            <!-- Neurofeedback Tab -->
-            <TabItem Header="Neurofeedback">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    
-                    <StackPanel HorizontalAlignment="Center" Margin="0,20,0,0" Grid.Row="0">
-                        <TextBlock Text="Smoothed Alpha/Beta Ratio" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,10"/>
-                        <TextBlock x:Name="AlphaRatioText" Text="0.00" FontSize="72" FontWeight="Black" Foreground="#A6E3A1" HorizontalAlignment="Center"/>
-                        <TextBlock x:Name="TargetRatioText" Text="Target: 1.00" FontSize="18" Foreground="#89B4FA" HorizontalAlignment="Center"/>
-                        <ProgressBar x:Name="AlphaRatioBar" Width="400" Height="20" Minimum="0" Maximum="3" Value="0" Margin="0,10" Foreground="#A6E3A1" Background="#313244"/>
-                    </StackPanel>
-
-                    <!-- Calibration & Audio Tools -->
-                    <Border Grid.Row="1" Background="#313244" Padding="20" Margin="40,10" CornerRadius="10">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            
-                            <StackPanel Grid.Column="0" Margin="0,0,10,0">
-                                <TextBlock Text="Session Calibration" FontWeight="Bold" Margin="0,0,0,5"/>
-                                <Button x:Name="BtnCalibrate" Content="Start 30s Baseline" Click="BtnCalibrate_Click" Padding="10" Background="#89B4FA" Foreground="#11111B" FontWeight="Bold"/>
-                                <ProgressBar x:Name="PbCalibration" Height="10" Margin="0,10,0,0" Background="#1E1E2E"/>
+                        
+                        <!-- Configuration and Calibration Area -->
+                        <Border Grid.Row="1" Background="#313244" Padding="20,15" Margin="20,5" CornerRadius="10" BorderBrush="#45475A" BorderThickness="1">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
                                 
-                                <TextBlock Text="Manual Tuning (Difficulty)" Margin="0,15,0,5" FontSize="12" Foreground="#A6ADC8"/>
-                                <Slider x:Name="SliderDifficulty" Minimum="-0.5" Maximum="0.5" Value="0" TickFrequency="0.1" IsSnapToTickEnabled="True" Margin="0,0,0,5"/>
-                                <TextBlock x:Name="TxtDifficulty" Text="Offset: +0.00" HorizontalAlignment="Center" FontSize="10"/>
-
-                                <TextBlock Text="Smoothing Window (sec)" Margin="0,15,0,5" FontSize="12" Foreground="#A6ADC8"/>
-                                <Slider x:Name="SliderSmoothing" Minimum="0.5" Maximum="10.0" Value="1.0" TickFrequency="0.5" IsSnapToTickEnabled="True" Margin="0,0,0,5" ValueChanged="SliderSmoothing_ValueChanged"/>
-                                <TextBlock x:Name="TxtSmoothing" Text="Window: 1.0s" HorizontalAlignment="Center" FontSize="10"/>
-
-                                <Button x:Name="BtnRefresh" Content="Reset Session Buffers" Click="BtnRefresh_Click" Margin="0,15,0,0" Padding="5" Background="#45475A" Foreground="#CDD6F4"/>
-                            </StackPanel>
-                            
-                            <StackPanel Grid.Column="1" Margin="10,0,0,0">
-                                <TextBlock Text="Audio Feedback" FontWeight="Bold" Margin="0,0,0,5"/>
-                                <StackPanel Orientation="Horizontal">
-                                    <Button x:Name="BtnSelectAudio" Content="Select File" Click="BtnSelectAudio_Click" Padding="5" Margin="0,0,5,0"/>
-                                    <TextBlock x:Name="TxtAudioFile" Text="No file selected" VerticalAlignment="Center" FontSize="12" Foreground="#A6ADC8"/>
+                                <!-- Session Baseline and Difficulty Calibration -->
+                                <StackPanel Grid.Column="0" Margin="0,0,15,0">
+                                    <TextBlock Text="Training Calibration" FontWeight="Bold" Margin="0,0,0,8" FontSize="14" Foreground="#89B4FA"/>
+                                    
+                                    <Grid Margin="0,0,0,8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Button x:Name="BtnCalibrate" Content="Record 30s Baseline" Click="BtnCalibrate_Click" Padding="8" Background="#89B4FA" Foreground="#11111B" FontWeight="Bold" BorderThickness="0"/>
+                                        <Button x:Name="BtnRefresh" Grid.Column="1" Content="Reset Buffers" Click="BtnRefresh_Click" Margin="8,0,0,0" Padding="8" Background="#45475A" Foreground="#CDD6F4" BorderThickness="0"/>
+                                    </Grid>
+                                    
+                                    <ProgressBar x:Name="PbCalibration" Height="8" Margin="0,0,0,12" Background="#1E1E2E" BorderThickness="0" Foreground="#A6E3A1"/>
+                                    
+                                    <!-- Tuning Parameters -->
+                                    <Grid Margin="0,2,0,4">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Target Threshold Difficulty" FontSize="11" Foreground="#A6ADC8"/>
+                                        <TextBlock x:Name="TxtDifficulty" Text="Offset: +0.00" Grid.Column="1" FontSize="11" Foreground="#CDD6F4" FontWeight="Bold"/>
+                                    </Grid>
+                                    <Slider x:Name="SliderDifficulty" Minimum="-0.5" Maximum="0.5" Value="0" TickFrequency="0.1" IsSnapToTickEnabled="True" Margin="0,0,0,8"/>
+                                    
+                                    <Grid Margin="0,2,0,4">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Ratio Smoothing Window" FontSize="11" Foreground="#A6ADC8"/>
+                                        <TextBlock x:Name="TxtSmoothing" Text="Window: 1.0s" Grid.Column="1" FontSize="11" Foreground="#CDD6F4" FontWeight="Bold"/>
+                                    </Grid>
+                                    <Slider x:Name="SliderSmoothing" Minimum="0.5" Maximum="10.0" Value="1.0" TickFrequency="0.5" IsSnapToTickEnabled="True" Margin="0,0,0,5" ValueChanged="SliderSmoothing_ValueChanged"/>
                                 </StackPanel>
-                                <TextBlock x:Name="TxtVolume" Text="Volume: 0%" Margin="0,10,0,0" Foreground="#F9E2AF"/>
-                            </StackPanel>
-                        </Grid>
-                    </Border>
-                    
-                    <ScottPlot:WpfPlot x:Name="WpfPlotPSD_NFB" Grid.Row="2" Margin="20" PreviewMouseDown="WpfPlotPSD_PreviewMouseDown"/>
-                </Grid>
-            </TabItem>
-
-            <!-- History Tab -->
-            <TabItem Header="History">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    <TextBlock Text="Brainwave Trends (Last 30s)" FontSize="20" FontWeight="Bold" Margin="20,10" HorizontalAlignment="Center"/>
-                    <ScottPlot:WpfPlot x:Name="WpfPlotHistory" Grid.Row="1" Margin="10"/>
-                </Grid>
-            </TabItem>
-
-            <!-- Debug Pipeline Tab -->
-            <TabItem Header="Debug Pipeline">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
-                        <TextBlock Text="Visualize Sensor: " VerticalAlignment="Center" FontSize="16" Margin="0,0,10,0" Foreground="#A6ADC8"/>
-                        <RadioButton x:Name="RbDebugTP9" Content="TP9" IsChecked="True" Foreground="#CDD6F4" Margin="0,0,10,0" VerticalAlignment="Center" Checked="RbDebug_Checked"/>
-                        <RadioButton x:Name="RbDebugAF7" Content="AF7" Foreground="#CDD6F4" Margin="0,0,10,0" VerticalAlignment="Center" Checked="RbDebug_Checked"/>
-                        <RadioButton x:Name="RbDebugAF8" Content="AF8" Foreground="#CDD6F4" Margin="0,0,10,0" VerticalAlignment="Center" Checked="RbDebug_Checked"/>
-                        <RadioButton x:Name="RbDebugTP10" Content="TP10" Foreground="#CDD6F4" Margin="0,0,10,0" VerticalAlignment="Center" Checked="RbDebug_Checked"/>
-                        <RadioButton x:Name="RbDebugAvg" Content="Average" Foreground="#CDD6F4" VerticalAlignment="Center" Checked="RbDebug_Checked"/>
-                    </StackPanel>
-
-                    <UniformGrid Grid.Row="1" Rows="3" Columns="2" Margin="10">
-                        <ScottPlot:WpfPlot x:Name="WpfPlotDebugRaw" Margin="5"/>
-                        <ScottPlot:WpfPlot x:Name="WpfPlotDebugNotched" Margin="5"/>
-                        <ScottPlot:WpfPlot x:Name="WpfPlotDebugFir" Margin="5"/>
-                        <ScottPlot:WpfPlot x:Name="WpfPlotDebugFiltered" Margin="5"/>
-                        <ScottPlot:WpfPlot x:Name="WpfPlotDebugPSD" Margin="5"/>
-                    </UniformGrid>
-                </Grid>
-            </TabItem>
-
-            <!-- Debug Overlay Tab -->
-            <TabItem Header="Debug Overlay">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-
-                    <!-- Layer Toggles -->
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
-                        <TextBlock Text="Layers: " VerticalAlignment="Center" Margin="0,0,10,0" Foreground="#A6ADC8"/>
-                        <CheckBox x:Name="CbShowRaw" Content="1. Raw" IsChecked="True" Foreground="#CDD6F4" Margin="0,0,10,0" VerticalAlignment="Center" Checked="CbLayer_Changed" Unchecked="CbLayer_Changed"/>
-                        <CheckBox x:Name="CbShowNotched" Content="2. Notch" IsChecked="True" Foreground="#CDD6F4" Margin="0,0,10,0" VerticalAlignment="Center" Checked="CbLayer_Changed" Unchecked="CbLayer_Changed"/>
-                        <CheckBox x:Name="CbShowFir" Content="3. FIR" IsChecked="True" Foreground="#CDD6F4" Margin="0,0,10,0" VerticalAlignment="Center" Checked="CbLayer_Changed" Unchecked="CbLayer_Changed"/>
-                        <CheckBox x:Name="CbShowIir" Content="4. IIR" IsChecked="True" Foreground="#CDD6F4" VerticalAlignment="Center" Checked="CbLayer_Changed" Unchecked="CbLayer_Changed"/>
-                    </StackPanel>
-
-                    <ScottPlot:WpfPlot x:Name="WpfPlotOverlay" Grid.Row="1" Margin="10"/>
-
-                    <!-- Filter Mode Selection -->
-                    <Border Grid.Row="2" Background="#313244" Padding="10" CornerRadius="5" Margin="20,0,20,10">
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                            <TextBlock Text="Filter Mode: " VerticalAlignment="Center" Margin="0,0,20,0" FontWeight="Bold" Foreground="#89B4FA"/>
-                            <RadioButton x:Name="RbModeBoth" Content="Combined (FIR+IIR)" IsChecked="True" Foreground="#CDD6F4" Margin="0,0,20,0" VerticalAlignment="Center" Checked="RbFilterMode_Checked"/>
-                            <RadioButton x:Name="RbModeIirOnly" Content="Only IIR (Standard)" Foreground="#CDD6F4" Margin="0,0,20,0" VerticalAlignment="Center" Checked="RbFilterMode_Checked"/>
-                            <RadioButton x:Name="RbModeFirOnly" Content="Only FIR (Linear Phase)" Foreground="#CDD6F4" VerticalAlignment="Center" Checked="RbFilterMode_Checked"/>
-                        </StackPanel>
-                    </Border>
-                </Grid>
-            </TabItem>
-
-            <!-- Research Tab -->
-            <TabItem Header="Research &amp; Tools">
-                <Grid>
-                    <StackPanel Margin="20" Width="400" HorizontalAlignment="Left">
-                        <TextBlock Text="Participant Metadata" FontSize="20" FontWeight="Bold" Margin="0,0,0,10"/>
-                        <TextBox x:Name="ParticipantIdInput" Margin="0,5" Padding="5" FontSize="16" Background="#313244" Foreground="#CDD6F4" BorderBrush="#45475A"/>
-                        <Button Content="Set Participant ID" Margin="0,10" Padding="10" Background="#89B4FA" Foreground="#11111B" FontWeight="Bold" BorderThickness="0"/>
-                        
-                        <TextBlock Text="LabRecorder Stream" FontSize="20" FontWeight="Bold" Margin="0,30,0,10"/>
-                        <TextBlock Text="Port: 22345" FontSize="16" Foreground="#A6ADC8" Margin="0,0,0,10"/>
-                        <Button Content="Connect LabRecorder" Margin="0,10" Padding="10" Background="#F9E2AF" Foreground="#11111B" FontWeight="Bold" BorderThickness="0"/>
-                        
-                        <TextBlock Text="Hardware &amp; Connection" FontSize="20" FontWeight="Bold" Margin="0,30,0,10" Foreground="#89B4FA"/>
-                        <Border Background="#313244" Padding="15" CornerRadius="10">
-                            <StackPanel>
-                                <TextBlock Text="LSL Provider" Foreground="#A6ADC8" Margin="0,0,0,5"/>
-                                <ComboBox x:Name="ComboProvider" SelectedIndex="0" Background="#1E1E2E" Foreground="#CDD6F4" Padding="5">
-                                    <ComboBoxItem Content="BlueMuse (Default)"/>
-                                    <ComboBoxItem Content="Brainflow Native BLE"/>
-                                    <ComboBoxItem Content="Brainflow BLED112 Dongle"/>
-                                    <ComboBoxItem Content="Brainflow Synthetic (Emulator)"/>
-                                </ComboBox>
-
-                                <TextBlock Text="Device Model" Foreground="#A6ADC8" Margin="0,10,0,5"/>
-                                <ComboBox x:Name="ComboDeviceModel" SelectedIndex="0" Background="#1E1E2E" Foreground="#CDD6F4" Padding="5">
-                                    <ComboBoxItem Content="Muse 2 (Default)"/>
-                                    <ComboBoxItem Content="Muse S"/>
-                                    <ComboBoxItem Content="Muse 2016"/>
-                                </ComboBox>
-
-                                <Grid Margin="0,15,0,0">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <StackPanel Grid.Column="0" Margin="0,0,5,0">
-                                        <TextBlock Text="COM Port (BLED)" FontSize="10" Foreground="#A6ADC8"/>
-                                        <TextBox x:Name="TxtComPort" Text="COM3" Background="#1E1E2E" Foreground="#CDD6F4" BorderBrush="#45475A" Padding="3"/>
+                                
+                                <!-- Audio Target Options -->
+                                <StackPanel Grid.Column="1" Margin="15,0,0,0">
+                                    <TextBlock Text="Audio Soundscapes" FontWeight="Bold" Margin="0,0,0,8" FontSize="14" Foreground="#89B4FA"/>
+                                    <TextBlock Text="Dynamic audio shifts volume according to your focus ratio:" FontSize="11" Foreground="#A6ADC8" TextWrapping="Wrap" Margin="0,0,0,10"/>
+                                    
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                        <Button x:Name="BtnSelectAudio" Content="Choose WAV/MP3" Click="BtnSelectAudio_Click" Padding="8,5" Background="#89B4FA" Foreground="#11111B" FontWeight="Bold" BorderThickness="0"/>
+                                        <TextBlock x:Name="TxtAudioFile" Text="No background track selected" VerticalAlignment="Center" FontSize="12" Foreground="#A6ADC8" Margin="10,0,0,0" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" Width="200"/>
                                     </StackPanel>
-                                    <StackPanel Grid.Column="1" Margin="5,0,0,0">
-                                        <TextBlock Text="MAC Address (Opt)" FontSize="10" Foreground="#A6ADC8"/>
-                                        <TextBox x:Name="TxtMacAddr" Text="" Background="#1E1E2E" Foreground="#CDD6F4" BorderBrush="#45475A" Padding="3"/>
-                                    </StackPanel>
-                                </Grid>
-
-                                <Button x:Name="BtnToggleLsl" Content="Start LSL Stream" Click="BtnToggleLsl_Click" Margin="0,15,0,0" Padding="10" Background="#A6E3A1" Foreground="#11111B" FontWeight="Bold" BorderThickness="0"/>
-                                <TextBlock x:Name="TxtLslStatus" Text="Status: Idle" FontSize="10" HorizontalAlignment="Center" Margin="0,5,0,0" Foreground="#A6ADC8"/>
-                            </StackPanel>
+                                    
+                                    <Border Background="#1E1E2E" CornerRadius="5" Padding="12,8" Margin="0,5,0,0" BorderBrush="#313244" BorderThickness="1">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="Live Modulated Volume: " FontSize="11" Foreground="#A6ADC8" VerticalAlignment="Center"/>
+                                            <TextBlock x:Name="TxtVolume" Text="0%" FontWeight="Bold" Foreground="#F9E2AF" FontSize="13" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+                            </Grid>
                         </Border>
-
-                        <TextBlock Text="Emergency Controls" FontSize="20" FontWeight="Bold" Margin="0,50,0,10" Foreground="#F38BA8"/>
-                        <Button Content="Kill All Python" Click="KillPython_Click" Margin="0,10" Padding="10" Background="#F38BA8" Foreground="#11111B" FontWeight="Bold" BorderThickness="0"/>
-                    </StackPanel>
-                </Grid>
-            </TabItem>
-        </TabControl>
+                        
+                        <!-- PSD plot -->
+                        <Grid Grid.Row="2" Margin="20,10">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,5,5">
+                                <TextBlock Text="PSD View Mode:" Foreground="#A6ADC8" VerticalAlignment="Center" Margin="0,0,8,0" FontSize="12"/>
+                                <ComboBox x:Name="ComboPsdModeNfb" Width="200" Padding="6,4" SelectedIndex="0" SelectionChanged="ComboPsdMode_SelectionChanged" Background="#1E1E2E" Foreground="#CDD6F4" BorderBrush="#45475A" FontSize="12">
+                                    <ComboBoxItem Content="Log"/>
+                                    <ComboBoxItem Content="Relative"/>
+                                </ComboBox>
+                            </StackPanel>
+                            <ScottPlot:WpfPlot x:Name="WpfPlotPSD_NFB" Grid.Row="1" PreviewMouseDown="WpfPlotPSD_PreviewMouseDown"/>
+                        </Grid>
+                    </Grid>
+                </TabItem>
+                
+                <!-- ==================== 3. COGNITIVE CHALLENGES SECTION ==================== -->
+                <TabItem Header="Cognitive Challenges">
+                    <Grid>
+                        <TabControl Background="#1E1E2E" BorderThickness="0">
+                            <!-- 3a. Active Game Board -->
+                            <TabItem Header="Active Challenge Room" Style="{StaticResource SubTabItemStyle}">
+                                <Grid Margin="5">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/> <!-- Header -->
+                                        <RowDefinition Height="Auto"/> <!-- Selector Toggle -->
+                                        <RowDefinition Height="1.6*"/> <!-- Interactive Board -->
+                                        <RowDefinition Height="1.0*"/> <!-- Focus Stats & PSD -->
+                                    </Grid.RowDefinitions>
+                                    
+                                    <TextBlock Text="Working Memory Capacity Challenge" FontSize="18" FontWeight="Bold" Margin="0,5" HorizontalAlignment="Center" Foreground="#89B4FA"/>
+                                    
+                                    <!-- Task Selection -->
+                                    <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">
+                                        <TextBlock Text="Choose Challenge Mode: " VerticalAlignment="Center" FontSize="13" Foreground="#A6ADC8" Margin="0,0,10,0"/>
+                                        <ComboBox x:Name="ComboMemoryTaskType" Width="280" Padding="6,4" SelectedIndex="0" SelectionChanged="ComboMemoryTaskType_SelectionChanged" Background="#1E1E2E" Foreground="#CDD6F4" BorderBrush="#45475A">
+                                            <ComboBoxItem Content="Digit Span Recall (Sequential)"/>
+                                            <ComboBoxItem Content="Spatial Sequence (Chimpanzee Test)"/>
+                                        </ComboBox>
+                                    </StackPanel>
+                                    
+                                    <!-- Main Challenge Canvas Box -->
+                                    <Border Grid.Row="2" Background="#313244" CornerRadius="10" Margin="15,0" Padding="15" BorderBrush="#45475A" BorderThickness="1">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="*"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            
+                                            <!-- Performance Status Info -->
+                                            <Grid Grid.Row="0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock x:Name="TxtMemoryLevel" Text="Level: 3" FontSize="14" Foreground="#CDD6F4" HorizontalAlignment="Left" FontWeight="Bold"/>
+                                                <TextBlock x:Name="TxtMemoryScore" Grid.Column="1" Text="Score: 0" FontSize="14" Foreground="#A6E3A1" HorizontalAlignment="Center" FontWeight="Bold"/>
+                                                <TextBlock x:Name="TxtMemoryStrikes" Grid.Column="2" Text="Strikes: 0/3" FontSize="14" Foreground="#F38BA8" HorizontalAlignment="Right" FontWeight="Bold"/>
+                                            </Grid>
+                                            
+                                            <!-- Digit Span View vs Spatial View -->
+                                            <Grid Grid.Row="1" Margin="0,12">
+                                                <!-- Digit Span panel -->
+                                                <Border x:Name="BorderDigitSpanView" Background="#1E1E2E" CornerRadius="8" Padding="15" Visibility="Visible">
+                                                    <TextBlock x:Name="MemoryGameStatusText" Text="Press 'Start Challenge' to begin!" FontSize="24" FontWeight="Bold" Foreground="#CDD6F4" HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"/>
+                                                </Border>
+                                                
+                                                <!-- Spatial Grid board -->
+                                                <Border x:Name="BorderSpatialView" Background="#1E1E2E" CornerRadius="8" Padding="15" Visibility="Collapsed">
+                                                    <Grid>
+                                                        <Grid.RowDefinitions>
+                                                            <RowDefinition Height="Auto"/>
+                                                            <RowDefinition Height="*"/>
+                                                        </Grid.RowDefinitions>
+                                                        <TextBlock x:Name="TxtSpatialStatus" Text="Remember square sequence, then select in order!" FontSize="12" Foreground="#89B4FA" HorizontalAlignment="Center" Margin="0,0,0,8" FontWeight="Bold"/>
+                                                        <Canvas x:Name="CanvasSpatialMemory" Grid.Row="1" Background="#11111B" ClipToBounds="True" Height="220" Width="500" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    </Grid>
+                                                </Border>
+                                            </Grid>
+                                            
+                                            <!-- Interactive Game Controls -->
+                                            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,5,0,0">
+                                                <TextBlock Text="Participant ID:" Foreground="#CDD6F4" VerticalAlignment="Center" Margin="0,0,5,0" />
+                                                <TextBox x:Name="TxtParticipantId" Width="100" Margin="0,0,15,0" Padding="4" Background="#1E1E2E" Foreground="#CDD6F4" BorderBrush="#45475A"/>
+                                                <Button x:Name="BtnStartMemory" Content="Start Challenge" Click="BtnStartMemory_Click" Width="140" Padding="8" Background="#89B4FA" Foreground="#11111B" FontWeight="Bold" BorderThickness="0" Margin="0,0,10,0"/>
+                                                
+                                                <!-- Digit span controls -->
+                                                <StackPanel x:Name="PanelDigitSpanInput" Orientation="Horizontal" Visibility="Visible">
+                                                    <TextBox x:Name="TxtMemoryInput" Width="150" Padding="8" FontSize="16" Background="#1E1E2E" Foreground="#CDD6F4" BorderBrush="#45475A" TextAlignment="Center" VerticalContentAlignment="Center" KeyDown="TxtMemoryInput_KeyDown" TextChanged="TxtMemoryInput_TextChanged" IsEnabled="False" Margin="0,0,10,0"/>
+                                                    <Button x:Name="BtnSubmitMemory" Content="Submit" Click="BtnSubmitMemory_Click" Width="100" Padding="8" Background="#A6E3A1" Foreground="#11111B" FontWeight="Bold" BorderThickness="0" IsEnabled="False"/>
+                                                </StackPanel>
+                                                
+                                                <!-- Spatial timer adjust offset -->
+                                                <StackPanel x:Name="PanelSpatialTimeAdjuster" Orientation="Horizontal" Visibility="Collapsed" Margin="10,0,0,0">
+                                                    <TextBlock Text="Time adjust/item:" Foreground="#A6ADC8" VerticalAlignment="Center" Margin="0,0,5,0" FontSize="12"/>
+                                                    <Slider x:Name="SliderSpatialTimeAdjuster" Width="120" Minimum="-5.0" Maximum="5.0" Value="0.0" TickFrequency="0.1" IsSnapToTickEnabled="True" VerticalAlignment="Center" ToolTip="Adjust display time per square (seconds)"/>
+                                                    <TextBlock x:Name="TxtSpatialTimeOffset" Text="{Binding ElementName=SliderSpatialTimeAdjuster, Path=Value, StringFormat={}{0:+0.0;-0.0;0.0}s}" Foreground="#CDD6F4" Width="40" VerticalAlignment="Center" Margin="5,0,0,0" FontSize="12"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                    
+                                    <!-- Frontal Gamma Hyper-focus level and live challenge PSD -->
+                                    <Grid Grid.Row="3" Margin="15,10,15,5">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="*"/>
+                                        </Grid.RowDefinitions>
+                                        
+                                        <!-- Gamma Tracker Bar -->
+                                        <Border Grid.Row="0" Background="#1E1E2E" CornerRadius="6" Padding="10,8" Margin="0,0,0,8" BorderBrush="#313244" BorderThickness="1">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="PREFRONTAL GAMMA HYPER-FOCUS" FontSize="11" FontWeight="Black" Foreground="#F9E2AF" VerticalAlignment="Center" Margin="0,0,15,0"/>
+                                                <ProgressBar x:Name="PbMemoryGamma" Grid.Column="1" Height="12" Minimum="0" Maximum="50" Value="0" Background="#313244" Foreground="#F9E2AF" BorderThickness="0" Margin="0,0,15,0"/>
+                                                <TextBlock x:Name="TxtMemoryGamma" Grid.Column="2" Text="Power: 0.0" FontSize="12" FontWeight="Bold" Foreground="#F9E2AF" VerticalAlignment="Center" Width="80" TextAlignment="Right"/>
+                                            </Grid>
+                                        </Border>
+                                        
+                                        <!-- Live PSD -->
+                                        <Grid Grid.Row="1">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="*"/>
+                                            </Grid.RowDefinitions>
+                                            <TextBlock Text="Live Challenge Spectral Density (Frontal Channels)" FontSize="11" FontWeight="Bold" Foreground="#A6ADC8" Margin="5,0,0,4"/>
+                                            <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,5,4">
+                                                <TextBlock Text="PSD View Mode:" Foreground="#A6ADC8" VerticalAlignment="Center" Margin="0,0,8,0" FontSize="11"/>
+                                                <ComboBox x:Name="ComboPsdModeTask" Width="190" Padding="5,3" SelectedIndex="0" SelectionChanged="ComboPsdMode_SelectionChanged" Background="#1E1E2E" Foreground="#CDD6F4" BorderBrush="#45475A" FontSize="11">
+                                                    <ComboBoxItem Content="Log"/>
+                                                    <ComboBoxItem Content="Relative"/>
+                                                </ComboBox>
+                                            </StackPanel>
+                                            <ScottPlot:WpfPlot x:Name="WpfPlotPSD_MemoryTask" Grid.Row="2" PreviewMouseDown="WpfPlotPSD_PreviewMouseDown"/>
+                                        </Grid>
+                                    </Grid>
+                                </Grid>
+                            </TabItem>
+                            
+                            <!-- 3b. Event Timeline Analytics -->
+                            <TabItem Header="Live Run Analytics" Style="{StaticResource SubTabItemStyle}">
+                                <Grid Margin="10">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/> <!-- Band Checkboxes -->
+                                        <RowDefinition Height="*"/>    <!-- Plot -->
+                                        <RowDefinition Height="Auto"/> <!-- Event Inspector Info Bar -->
+                                    </Grid.RowDefinitions>
+                                    
+                                    <!-- Band Selection Overlay checkboxes -->
+                                    <Border Grid.Row="0" Background="#1E1E2E" CornerRadius="8" Padding="12,10" Margin="10,0,10,10" BorderBrush="#313244" BorderThickness="1">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="Overlay Bands: " FontSize="13" FontWeight="Bold" Foreground="#CDD6F4" VerticalAlignment="Center" Margin="0,0,15,0"/>
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                <CheckBox x:Name="CbTrendDelta" Content="Delta (δ)" Foreground="#89B4FA" Margin="0,0,22,0" IsChecked="False" Checked="CbTrend_Changed" Unchecked="CbTrend_Changed" FontSize="12" FontWeight="Bold" VerticalAlignment="Center"/>
+                                                <CheckBox x:Name="CbTrendTheta" Content="Theta (θ)" Foreground="#CBA6F7" Margin="0,0,22,0" IsChecked="False" Checked="CbTrend_Changed" Unchecked="CbTrend_Changed" FontSize="12" FontWeight="Bold" VerticalAlignment="Center"/>
+                                                <CheckBox x:Name="CbTrendAlpha" Content="Alpha (α)" Foreground="#A6E3A1" Margin="0,0,22,0" IsChecked="True" Checked="CbTrend_Changed" Unchecked="CbTrend_Changed" FontSize="12" FontWeight="Bold" VerticalAlignment="Center"/>
+                                                <CheckBox x:Name="CbTrendBeta" Content="Beta (β)" Foreground="#74C7EC" Margin="0,0,22,0" IsChecked="True" Checked="CbTrend_Changed" Unchecked="CbTrend_Changed" FontSize="12" FontWeight="Bold" VerticalAlignment="Center"/>
+                                                <CheckBox x:Name="CbTrendGamma" Content="Gamma (γ)" Foreground="#F9E2AF" Margin="0,0,0,0" IsChecked="True" Checked="CbTrend_Changed" Unchecked="CbTrend_Changed" FontSize="12" FontWeight="Bold" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                    
+                                    <!-- Live Trend Plot -->
+                                    <ScottPlot:WpfPlot x:Name="WpfPlotGammaTrend_MemoryTask" Grid.Row="1" Margin="10,5" MouseMove="WpfPlotGammaTrend_MouseMove"/>
+                                    
+                                    <!-- Interactive Tooltip Event Tracker Details Banner -->
+                                    <Border Grid.Row="2" Background="#11111B" CornerRadius="6" Padding="12,10" Margin="10,10,10,0" BorderBrush="#313244" BorderThickness="1">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="Timeline Detail Tracker:" FontSize="11" FontWeight="Bold" Foreground="#F38BA8" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                            <TextBlock x:Name="TxtEventDetails" Grid.Column="1" Text="Hover over dotted vertical event lines to inspect user clicks and game system transitions." FontSize="12" Foreground="#A6ADC8" VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </Border>
+                                </Grid>
+                            </TabItem>
+                            
+                            <!-- 3c. Post-Test Analyzer -->
+                            <TabItem Header="Post-Test Analysis" Style="{StaticResource SubTabItemStyle}">
+                                <Grid Margin="10">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/> <!-- Band Checkbox selection -->
+                                        <RowDefinition Height="Auto"/> <!-- Trial Dynamic checkboxes -->
+                                        <RowDefinition Height="*"/>    <!-- Graph Plot -->
+                                    </Grid.RowDefinitions>
+                                    
+                                    <!-- Band selectors -->
+                                    <Border Grid.Row="0" Background="#1E1E2E" CornerRadius="8" Padding="12,10" Margin="10,0,10,8" BorderBrush="#313244" BorderThickness="1">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="Select Bands: " FontSize="13" FontWeight="Bold" Foreground="#CDD6F4" VerticalAlignment="Center" Margin="0,0,15,0"/>
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                <CheckBox x:Name="CbPostDelta" Content="Delta (δ)" Foreground="#89B4FA" Margin="0,0,22,0" IsChecked="False" Checked="CbPostBand_Changed" Unchecked="CbPostBand_Changed" FontSize="12" FontWeight="Bold" VerticalAlignment="Center"/>
+                                                <CheckBox x:Name="CbPostTheta" Content="Theta (θ)" Foreground="#CBA6F7" Margin="0,0,22,0" IsChecked="False" Checked="CbPostBand_Changed" Unchecked="CbPostBand_Changed" FontSize="12" FontWeight="Bold" VerticalAlignment="Center"/>
+                                                <CheckBox x:Name="CbPostAlpha" Content="Alpha (α)" Foreground="#A6E3A1" Margin="0,0,22,0" IsChecked="False" Checked="CbPostBand_Changed" Unchecked="CbPostBand_Changed" FontSize="12" FontWeight="Bold" VerticalAlignment="Center"/>
+                                                <CheckBox x:Name="CbPostBeta" Content="Beta (β)" Foreground="#74C7EC" Margin="0,0,22,0" IsChecked="False" Checked="CbPostBand_Changed" Unchecked="CbPostBand_Changed" FontSize="12" FontWeight="Bold" VerticalAlignment="Center"/>
+                                                <CheckBox x:Name="CbPostGamma" Content="Gamma (γ)" Foreground="#F9E2AF" Margin="0,0,0,0" IsChecked="True" Checked="CbPostBand_Changed" Unchecked="CbPostBand_Changed" FontSize="12" FontWeight="Bold" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                    
+                                    <!-- Dynamic Trials layout wrap list -->
+                                    <Border Grid.Row="1" Background="#1E1E2E" CornerRadius="8" Padding="12,10" Margin="10,0,10,8" BorderBrush="#313244" BorderThickness="1">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="Select Trials: " FontSize="13" FontWeight="Bold" Foreground="#CDD6F4" VerticalAlignment="Center" Margin="0,0,15,0"/>
+                                            <WrapPanel x:Name="PanelPostTestTrialCheckboxes" Grid.Column="1" VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </Border>
+                                    
+                                    <!-- Main Graph Plot -->
+                                    <ScottPlot:WpfPlot x:Name="WpfPlotPostTestAnalysis" Grid.Row="2" Margin="10,5,10,10"/>
+                                </Grid>
+                            </TabItem>
+                        </TabControl>
+                    </Grid>
+                </TabItem>
+                
+                <!-- ==================== 4. SYSTEM & DIAGNOSTICS SECTION ==================== -->
+                <TabItem Header="System &amp; Diagnostics">
+                    <Grid>
+                        <TabControl Background="#1E1E2E" BorderThickness="0">
+                            <!-- 4a. LabRecorder & hardware link -->
+                            <TabItem Header="Hardware &amp; LSL" Style="{StaticResource SubTabItemStyle}">
+                                <ScrollViewer Margin="5">
+                                    <Grid Margin="20">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="380"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        
+                                        <StackPanel Grid.Column="0">
+                                            <TextBlock Text="Participant Metadata" FontSize="16" FontWeight="Bold" Margin="0,0,0,8" Foreground="#89B4FA"/>
+                                            <TextBox x:Name="ParticipantIdInput" Margin="0,0,0,10" Padding="8,6" FontSize="14" Background="#313244" Foreground="#CDD6F4" BorderBrush="#45475A"/>
+                                            <Button Content="Set Participant ID" Margin="0,0,0,25" Padding="10" Background="#89B4FA" Foreground="#11111B" FontWeight="Bold" BorderThickness="0"/>
+                                            
+                                            <TextBlock Text="LabRecorder Synchronization" FontSize="16" FontWeight="Bold" Margin="0,0,0,8" Foreground="#89B4FA"/>
+                                            <TextBlock Text="Port: 22345" FontSize="13" Foreground="#A6ADC8" Margin="0,0,0,10"/>
+                                            <Button Content="Connect LabRecorder Link" Margin="0,0,0,25" Padding="10" Background="#F9E2AF" Foreground="#11111B" FontWeight="Bold" BorderThickness="0"/>
+                                            
+                                            <TextBlock Text="Emergency Controls" FontSize="16" FontWeight="Bold" Margin="0,15,0,8" Foreground="#F38BA8"/>
+                                            <Button Content="Kill Running LSL Python Processes" Click="KillPython_Click" Padding="10" Background="#F38BA8" Foreground="#11111B" FontWeight="Bold" BorderThickness="0"/>
+                                        </StackPanel>
+                                        
+                                        <StackPanel Grid.Column="1" Margin="40,0,0,0">
+                                            <TextBlock Text="EEG Sensor Source Configuration" FontSize="16" FontWeight="Bold" Margin="0,0,0,10" Foreground="#89B4FA"/>
+                                            <Border Background="#313244" Padding="20" CornerRadius="10" BorderBrush="#45475A" BorderThickness="1">
+                                                <StackPanel>
+                                                    <TextBlock Text="LSL Provider" Foreground="#A6ADC8" Margin="0,0,0,6" FontSize="12"/>
+                                                    <ComboBox x:Name="ComboProvider" SelectedIndex="0" Background="#1E1E2E" Foreground="#CDD6F4" Padding="6,4" Margin="0,0,0,15">
+                                                        <ComboBoxItem Content="BlueMuse (Default)"/>
+                                                        <ComboBoxItem Content="Brainflow Native BLE"/>
+                                                        <ComboBoxItem Content="Brainflow BLED112 Dongle"/>
+                                                        <ComboBoxItem Content="Brainflow Synthetic (Emulator)"/>
+                                                    </ComboBox>
+                                                    
+                                                    <TextBlock Text="Device Model" Foreground="#A6ADC8" Margin="0,0,0,6" FontSize="12"/>
+                                                    <ComboBox x:Name="ComboDeviceModel" SelectedIndex="0" Background="#1E1E2E" Foreground="#CDD6F4" Padding="6,4" Margin="0,0,0,15">
+                                                        <ComboBoxItem Content="Muse 2 (Default)"/>
+                                                        <ComboBoxItem Content="Muse S"/>
+                                                        <ComboBoxItem Content="Muse 2016"/>
+                                                    </ComboBox>
+                                                    
+                                                    <Grid Margin="0,0,0,15">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                                                            <TextBlock Text="COM Port (BLED)" FontSize="10" Foreground="#A6ADC8" Margin="0,0,0,4"/>
+                                                            <TextBox x:Name="TxtComPort" Text="COM3" Background="#1E1E2E" Foreground="#CDD6F4" BorderBrush="#45475A" Padding="6,4"/>
+                                                        </StackPanel>
+                                                        <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                                            <TextBlock Text="MAC Address (Opt)" FontSize="10" Foreground="#A6ADC8" Margin="0,0,0,4"/>
+                                                            <TextBox x:Name="TxtMacAddr" Text="" Background="#1E1E2E" Foreground="#CDD6F4" BorderBrush="#45475A" Padding="6,4"/>
+                                                        </StackPanel>
+                                                    </Grid>
+                                                    
+                                                    <Button x:Name="BtnToggleLsl" Content="Start LSL Stream Connection" Click="BtnToggleLsl_Click" Margin="0,10,0,0" Padding="12" Background="#A6E3A1" Foreground="#11111B" FontWeight="Bold" BorderThickness="0"/>
+                                                    <TextBlock x:Name="TxtLslStatus" Text="Status: Idle" FontSize="11" HorizontalAlignment="Center" Margin="0,8,0,0" Foreground="#A6ADC8"/>
+                                                </StackPanel>
+                                            </Border>
+                                        </StackPanel>
+                                    </Grid>
+                                </ScrollViewer>
+                            </TabItem>
+                            
+                            <!-- 4b. DSP filter setup -->
+                            <TabItem Header="DSP &amp; Filter Config" Style="{StaticResource SubTabItemStyle}">
+                                <Grid Margin="5">
+                                    <Border Background="#313244" CornerRadius="10" Margin="20,15" Padding="25" BorderBrush="#45475A" BorderThickness="1" VerticalAlignment="Top" HorizontalAlignment="Center" Width="600">
+                                        <StackPanel>
+                                            <TextBlock Text="DSP Filter Cutoff &amp; Power Noise Tones" FontSize="16" FontWeight="Bold" Foreground="#89B4FA" Margin="0,0,0,15" HorizontalAlignment="Center"/>
+                                            
+                                            <!-- Low Pass -->
+                                            <TextBlock Text="Low-Pass Filter Cutoff (Hz)" FontSize="13" FontWeight="Bold" Foreground="#CDD6F4" Margin="0,0,0,4"/>
+                                            <TextBlock Text="Controls the high-frequency limit. 100 Hz captures faster gamma activity; 40 Hz standard for traditional focus neurofeedback." FontSize="11" Foreground="#A6ADC8" TextWrapping="Wrap" Margin="0,0,0,8"/>
+                                            <Grid Margin="0,0,0,20">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Slider x:Name="SliderLowPass" Minimum="20" Maximum="110" Value="100" TickFrequency="5" IsSnapToTickEnabled="True" ValueChanged="SliderLowPass_ValueChanged" VerticalAlignment="Center"/>
+                                                <TextBlock x:Name="TxtLowPassSetting" Grid.Column="1" Text="100 Hz" Width="70" TextAlignment="Right" Foreground="#89B4FA" VerticalAlignment="Center" FontWeight="Bold" Margin="15,0,0,0" FontSize="14"/>
+                                            </Grid>
+                                            
+                                            <!-- High Pass -->
+                                            <TextBlock Text="High-Pass Filter Cutoff (Hz)" FontSize="13" FontWeight="Bold" Foreground="#CDD6F4" Margin="0,0,0,4"/>
+                                            <TextBlock Text="Eliminates slow DC baseline drift or movement offsets. Default: 1.0 Hz." FontSize="11" Foreground="#A6ADC8" TextWrapping="Wrap" Margin="0,0,0,8"/>
+                                            <Grid Margin="0,0,0,20">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Slider x:Name="SliderHighPass" Minimum="0.1" Maximum="5.0" Value="1.0" TickFrequency="0.1" IsSnapToTickEnabled="True" ValueChanged="SliderHighPass_ValueChanged" VerticalAlignment="Center"/>
+                                                <TextBlock x:Name="TxtHighPassSetting" Grid.Column="1" Text="1.0 Hz" Width="70" TextAlignment="Right" Foreground="#89B4FA" VerticalAlignment="Center" FontWeight="Bold" Margin="15,0,0,0" FontSize="14"/>
+                                            </Grid>
+                                            
+                                            <!-- Notch -->
+                                            <TextBlock Text="Notch Environment AC Filter (Hz)" FontSize="13" FontWeight="Bold" Foreground="#CDD6F4" Margin="0,0,0,4"/>
+                                            <TextBlock Text="Cuts out environmental wall power hum (60 Hz in US/Canada; 50 Hz in Europe)." FontSize="11" Foreground="#A6ADC8" TextWrapping="Wrap" Margin="0,0,0,10"/>
+                                            <StackPanel Orientation="Horizontal" Margin="0,0,0,25" HorizontalAlignment="Center">
+                                                <RadioButton x:Name="RbNotch60Setting" Content="60 Hz (US/CA)" IsChecked="True" Foreground="#CDD6F4" Margin="0,0,25,0" FontSize="12"/>
+                                                <RadioButton x:Name="RbNotch50Setting" Content="50 Hz (EU)" Foreground="#CDD6F4" Margin="0,0,25,0" FontSize="12"/>
+                                                <RadioButton x:Name="RbNotchOffSetting" Content="Disable Notch Filter" Foreground="#CDD6F4" FontSize="12"/>
+                                            </StackPanel>
+                                            
+                                            <!-- Apply Button -->
+                                            <Button x:Name="BtnApplyFilterSettings" Content="Apply Settings to Active Pipeline" Click="BtnApplyFilterSettings_Click" Padding="12" Background="#A6E3A1" Foreground="#11111B" FontWeight="Bold" BorderThickness="0" FontSize="13"/>
+                                        </StackPanel>
+                                    </Border>
+                                </Grid>
+                            </TabItem>
+                            
+                            <!-- 4c. Debug pipelines stages -->
+                            <TabItem Header="Debug Pipeline Stages" Style="{StaticResource SubTabItemStyle}">
+                                <Grid Margin="5">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">
+                                        <TextBlock Text="Visualize Channel: " VerticalAlignment="Center" FontSize="13" Margin="0,0,10,0" Foreground="#A6ADC8"/>
+                                        <RadioButton x:Name="RbDebugTP9" Content="TP9 (Left Ear)" IsChecked="True" Foreground="#CDD6F4" Margin="0,0,15,0" VerticalAlignment="Center" Checked="RbDebug_Checked"/>
+                                        <RadioButton x:Name="RbDebugAF7" Content="AF7 (Left Front)" Foreground="#CDD6F4" Margin="0,0,15,0" VerticalAlignment="Center" Checked="RbDebug_Checked"/>
+                                        <RadioButton x:Name="RbDebugAF8" Content="AF8 (Right Front)" Foreground="#CDD6F4" Margin="0,0,15,0" VerticalAlignment="Center" Checked="RbDebug_Checked"/>
+                                        <RadioButton x:Name="RbDebugTP10" Content="TP10 (Right Ear)" Foreground="#CDD6F4" Margin="0,0,15,0" VerticalAlignment="Center" Checked="RbDebug_Checked"/>
+                                        <RadioButton x:Name="RbDebugAvg" Content="Average Channels" Foreground="#CDD6F4" VerticalAlignment="Center" Checked="RbDebug_Checked"/>
+                                    </StackPanel>
+                                    
+                                    <UniformGrid Grid.Row="1" Rows="3" Columns="2" Margin="5">
+                                        <ScottPlot:WpfPlot x:Name="WpfPlotDebugRaw" Margin="4"/>
+                                        <ScottPlot:WpfPlot x:Name="WpfPlotDebugNotched" Margin="4"/>
+                                        <ScottPlot:WpfPlot x:Name="WpfPlotDebugFir" Margin="4"/>
+                                        <ScottPlot:WpfPlot x:Name="WpfPlotDebugFiltered" Margin="4"/>
+                                        <ScottPlot:WpfPlot x:Name="WpfPlotDebugPSD" Margin="4"/>
+                                    </UniformGrid>
+                                </Grid>
+                            </TabItem>
+                            
+                            <!-- 4d. Debug Overlay comparator -->
+                            <TabItem Header="Debug Overlay Analyzer" Style="{StaticResource SubTabItemStyle}">
+                                <Grid Margin="10">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    
+                                    <!-- Layer checkboxes toggle -->
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">
+                                        <TextBlock Text="Overlay Layers: " VerticalAlignment="Center" Margin="0,0,12,0" Foreground="#A6ADC8"/>
+                                        <CheckBox x:Name="CbShowRaw" Content="1. Raw Signals" IsChecked="True" Foreground="#CDD6F4" Margin="0,0,15,0" VerticalAlignment="Center" Checked="CbLayer_Changed" Unchecked="CbLayer_Changed"/>
+                                        <CheckBox x:Name="CbShowNotched" Content="2. Notch Output" IsChecked="True" Foreground="#CDD6F4" Margin="0,0,15,0" VerticalAlignment="Center" Checked="CbLayer_Changed" Unchecked="CbLayer_Changed"/>
+                                        <CheckBox x:Name="CbShowFir" Content="3. FIR Filter Stages" IsChecked="True" Foreground="#CDD6F4" Margin="0,0,15,0" VerticalAlignment="Center" Checked="CbLayer_Changed" Unchecked="CbLayer_Changed"/>
+                                        <CheckBox x:Name="CbShowIir" Content="4. IIR Filter Stages" IsChecked="True" Foreground="#CDD6F4" VerticalAlignment="Center" Checked="CbLayer_Changed" Unchecked="CbLayer_Changed"/>
+                                    </StackPanel>
+                                    
+                                    <ScottPlot:WpfPlot x:Name="WpfPlotOverlay" Grid.Row="1" Margin="5"/>
+                                    
+                                    <!-- Filter Mode Selection -->
+                                    <Border Grid.Row="2" Background="#313244" Padding="15,10" CornerRadius="6" Margin="10,10,10,0" BorderBrush="#45475A" BorderThickness="1">
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                            <TextBlock Text="Filter Mode Comparison: " VerticalAlignment="Center" Margin="0,0,20,0" FontWeight="Bold" Foreground="#89B4FA"/>
+                                            <RadioButton x:Name="RbModeBoth" Content="Combined (FIR + IIR)" IsChecked="True" Foreground="#CDD6F4" Margin="0,0,20,0" VerticalAlignment="Center" Checked="RbFilterMode_Checked"/>
+                                            <RadioButton x:Name="RbModeIirOnly" Content="Only IIR (Standard Feed)" Foreground="#CDD6F4" Margin="0,0,20,0" VerticalAlignment="Center" Checked="RbFilterMode_Checked"/>
+                                            <RadioButton x:Name="RbModeFirOnly" Content="Only FIR (Linear Phase)" Foreground="#CDD6F4" VerticalAlignment="Center" Checked="RbFilterMode_Checked"/>
+                                        </StackPanel>
+                                    </Border>
+                                </Grid>
+                            </TabItem>
+                        </TabControl>
+                    </Grid>
+                </TabItem>
+            </TabControl>
+        </Grid>
     </Grid>
 </Window>

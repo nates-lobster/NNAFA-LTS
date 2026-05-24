@@ -3,40 +3,50 @@ from scipy.signal import welch, iirnotch, butter, lfilter, firwin
 
 FS = 256.0
 
-# Pre-calculate FIR coefficients (129 taps for 1-40Hz bandpass)
+# Taps count for FIR filter
 TAPS = 129
-fir_coeffs = firwin(TAPS, [1.0, 40.0], pass_zero=False, fs=FS)
 
-def apply_filters(data, mode="BOTH"):
+def apply_filters(data, mode="BOTH", low_pass=100.0, high_pass=1.0, notch=60.0):
     """
-    Applies filters based on mode: BOTH, ONLY_IIR, ONLY_FIR.
+    Applies Notch, FIR, and IIR bandpass filters dynamically.
+    The default low-pass filter cutoff is 100.0 Hz.
     """
     nyq = 0.5 * FS
-    b_notch, a_notch = iirnotch(60.0, 30.0, FS)
-    notched = lfilter(b_notch, a_notch, data, axis=0)
     
-    # FIR Stage
-    if mode in ["BOTH", "ONLY_FIR"]:
-        fir_denoised = lfilter(fir_coeffs, 1.0, notched, axis=0)
+    # 1. Notch Filter Stage
+    if notch > 0:
+        b_notch, a_notch = iirnotch(notch, 30.0, FS)
+        notched = lfilter(b_notch, a_notch, data, axis=0)
     else:
-        fir_denoised = notched # Pass through
+        notched = data.copy()
         
-    # IIR Stage
-    if mode in ["BOTH", "ONLY_IIR"]:
-        low = 1.0 / nyq
-        high = 40.0 / nyq
+    # 2. FIR Stage
+    if mode in ["BOTH", "ONLY_FIR"] and low_pass > high_pass:
+        cutoff_high = min(low_pass, nyq - 1.0)
+        coeffs = firwin(TAPS, [high_pass, cutoff_high], pass_zero=False, fs=FS)
+        fir_denoised = lfilter(coeffs, 1.0, notched, axis=0)
+    else:
+        fir_denoised = notched
+        
+    # 3. IIR Stage
+    if mode in ["BOTH", "ONLY_IIR"] and low_pass > high_pass:
+        low = high_pass / nyq
+        cutoff_high = min(low_pass, nyq - 1.0)
+        high = cutoff_high / nyq
         b_band, a_band = butter(4, [low, high], btype='band')
         bandpassed = lfilter(b_band, a_band, fir_denoised, axis=0)
     else:
-        bandpassed = fir_denoised # Pass through
-    
+        bandpassed = fir_denoised
+        
     return notched, fir_denoised, bandpassed
 
 def compute_band_powers(filtered_data):
     """
     Extracts band powers using Welch's method and np.trapezoid.
+    Uses a 2-second segment length (512 samples) and 1024-point FFT zero-padding
+    for a smooth 0.25 Hz frequency resolution (401 points between 0 and 100 Hz).
     """
-    freqs, psd = welch(filtered_data, fs=FS, nperseg=256, axis=0)
+    freqs, psd = welch(filtered_data, fs=FS, nperseg=512, nfft=1024, axis=0)
     psd_avg = np.mean(psd, axis=1)
     
     bands = {

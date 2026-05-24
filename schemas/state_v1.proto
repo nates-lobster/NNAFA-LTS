@@ -26,6 +26,9 @@ message SessionSettings {
   string participant_id = 2;
   float smoothing_window_s = 3;
   bool reset_buffers = 4;
+  float low_pass_hz = 5;
+  float high_pass_hz = 6;
+  float notch_hz = 7;
 }
 
 message StateRequest {

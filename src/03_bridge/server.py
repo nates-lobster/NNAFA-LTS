@@ -37,9 +37,12 @@ CALIBRATION_BUFFER = []
 TARGET_RATIO = 1.0
 CALIBRATION_TOTAL_SAMPLES = 600 # 30s @ 20Hz
 IS_CALIBRATING = False
+LOW_PASS_HZ = 100.0
+HIGH_PASS_HZ = 1.0
+NOTCH_HZ = 60.0
 
 async def listen_for_commands(websocket):
-    global CURRENT_MODE, IS_CALIBRATING, CALIBRATION_BUFFER
+    global CURRENT_MODE, IS_CALIBRATING, CALIBRATION_BUFFER, LOW_PASS_HZ, HIGH_PASS_HZ, NOTCH_HZ
     try:
         async for message in websocket:
             request = state_v1_pb2.StateRequest()
@@ -58,6 +61,14 @@ async def listen_for_commands(websocket):
                 global CURRENT_SMOOTHING_S
                 CURRENT_SMOOTHING_S = request.settings.smoothing_window_s
             
+            # Dynamic filter parameters
+            if request.settings.low_pass_hz > 0:
+                LOW_PASS_HZ = request.settings.low_pass_hz
+            if request.settings.high_pass_hz > 0:
+                HIGH_PASS_HZ = request.settings.high_pass_hz
+            if request.settings.notch_hz >= 0:
+                NOTCH_HZ = request.settings.notch_hz
+            
             if request.settings.reset_buffers:
                 global RATIO_HISTORY, CALIBRATION_BUFFER
                 RATIO_HISTORY.clear()
@@ -70,7 +81,7 @@ async def listen_for_commands(websocket):
                 CALIBRATION_BUFFER = []
                 logger.info("Starting 30s calibration phase...")
             
-            logger.info(f"WS Command processed: mode={CURRENT_MODE}, smoothing_window_s={CURRENT_SMOOTHING_S}, reset_buffers={request.settings.reset_buffers}, target_state={request.target_state}")
+            logger.info(f"WS Command processed: mode={CURRENT_MODE}, smoothing_window_s={CURRENT_SMOOTHING_S}, reset_buffers={request.settings.reset_buffers}, target_state={request.target_state}, low_pass={LOW_PASS_HZ}, high_pass={HIGH_PASS_HZ}, notch={NOTCH_HZ}")
     except Exception as e:
         logger.exception("WS: Error in command listener:")
 
@@ -86,8 +97,8 @@ async def lsl_connection_manager(stream):
         await asyncio.sleep(5.0)  # Retry resolution every 5 seconds
 
 async def eeg_loop(websocket):
-    global CURRENT_MODE, RATIO_HISTORY, CALIBRATION_BUFFER, TARGET_RATIO, IS_CALIBRATING, CURRENT_SMOOTHING_S
-    stream = lsl_stream.EEGStream(chunk_size=12)
+    global CURRENT_MODE, RATIO_HISTORY, CALIBRATION_BUFFER, TARGET_RATIO, IS_CALIBRATING, CURRENT_SMOOTHING_S, LOW_PASS_HZ, HIGH_PASS_HZ, NOTCH_HZ
+    stream = lsl_stream.EEGStream(chunk_size=1024)
     ring = buffer.RingBuffer(size=512, channels=4)
     last_data_time = time.time()
     last_stall_warning = 0
@@ -111,7 +122,9 @@ async def eeg_loop(websocket):
                 if data is not None:
                     last_data_time = time.time()
                     # Pure DSP
-                    notched, fir_denoised, filtered = dsp.apply_filters(data, mode=CURRENT_MODE)
+                    notched, fir_denoised, filtered = dsp.apply_filters(
+                        data, mode=CURRENT_MODE, low_pass=LOW_PASS_HZ, high_pass=HIGH_PASS_HZ, notch=NOTCH_HZ
+                    )
                     powers, freqs, psd_avg, psd_all = dsp.compute_band_powers(filtered)
                     metrics = dsp.calculate_metrics(powers, data, notched)
                     
