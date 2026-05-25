@@ -48,20 +48,24 @@ if %errorlevel% neq 0 (
     pause
     exit /b 1
 )
-echo.
-
-:: Step 5: Build C# WPF Frontend
-echo Restoring and compiling C# WPF Frontend...
-dotnet build src/04_frontend/Frontend.csproj
-if %errorlevel% neq 0 (
-    echo [WARNING] C# build had warnings or errors. Ensure .NET 10.0 SDK is installed.
 )
 echo.
 
+:: Step 5: Extract Standalone Frontend
+if not exist "deploy\frontend\Frontend.exe" (
+    echo Extracting standalone C# WPF Frontend...
+    powershell -Command "Expand-Archive -Path deploy.zip -DestinationPath . -Force"
+    if %errorlevel% neq 0 (
+        echo [WARNING] Failed to extract deploy.zip. You may need to extract it manually.
+    )
+) else (
+    echo Standalone frontend already extracted.
+)
+echo.
 echo ============================================================
 echo   Setup completed successfully!
 echo   You can now launch the full NNAFA application using:
-echo   .\run_v0.2.bat
+echo   .\run.bat
 echo ============================================================
 echo.
 pause
