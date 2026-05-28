@@ -4,22 +4,23 @@ import logging
 logger = logging.getLogger("lsl_stream")
 
 class EEGStream:
-    def __init__(self, stream_name="Muse", chunk_size=12):
+    def __init__(self, stream_name="Muse", chunk_size=12, resolve_timeout=5.0):
         self.stream_name = stream_name
         self.chunk_size = chunk_size
+        self.resolve_timeout = resolve_timeout
         self.inlet = None
         
-    def connect(self, timeout=1.0):
-        logger.info(f"LSL: Resolving '{self.stream_name}' stream (type: EEG)...")
+    def connect(self):
+        logger.info(f"LSL: Resolving '{self.stream_name}' stream (type: EEG) with timeout {self.resolve_timeout}s...")
         try:
             # First try resolving by the exact stream name
-            streams = pylsl.resolve_byprop('name', self.stream_name, timeout=timeout)
+            streams = pylsl.resolve_byprop('name', self.stream_name, timeout=self.resolve_timeout)
             if not streams:
-                logger.warning(f"LSL: No stream named '{self.stream_name}' found. Trying fallback to type 'EEG'...")
-                streams = pylsl.resolve_byprop('type', 'EEG', timeout=timeout)
+                logger.warning(f"LSL: No stream named '{self.stream_name}' found. Trying fallback to type 'EEG' with timeout {self.resolve_timeout}s...")
+                streams = pylsl.resolve_byprop('type', 'EEG', timeout=self.resolve_timeout)
                 
             if not streams:
-                logger.error("LSL: No EEG stream found on the network.")
+                logger.error("LSL: No EEG stream found on the network after timeout.")
                 return False
                 
             self.inlet = pylsl.StreamInlet(streams[0], max_chunklen=self.chunk_size)

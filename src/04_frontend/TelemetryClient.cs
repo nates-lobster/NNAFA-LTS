@@ -10,8 +10,16 @@ namespace Frontend
     public class TelemetryClient
     {
         private readonly ClientWebSocket _client = new();
+        public TelemetryClient()
+        {
+            // Enable built-in keep-alive pings to prevent server timeout
+            _client.Options.KeepAliveInterval = TimeSpan.FromSeconds(5);
+        }
         private readonly Uri _uri = new("ws://127.0.0.1:8765");
         private readonly SemaphoreSlim _semaphore = new(1, 1);
+        // Throttle UI event frequency to avoid UI freeze (max 10 Hz)
+        private readonly TimeSpan _eventThrottleInterval = TimeSpan.FromMilliseconds(100);
+        private DateTime _lastEventTimeUtc = DateTime.MinValue;
 
         public event Action<TelemetryPayload>? OnTelemetryReceived;
 
@@ -51,7 +59,14 @@ namespace Frontend
                         await _semaphore.WaitAsync(ct);
                         try
                         {
+                            // Throttle OnTelemetryReceived to max 10 Hz
+                        var now = DateTime.UtcNow;
+                        if (now - _lastEventTimeUtc >= _eventThrottleInterval)
+                        {
+                            _lastEventTimeUtc = now;
                             OnTelemetryReceived?.Invoke(payload);
+                        }
+                        // Else drop this payload to keep UI responsive
                         }
                         finally
                         {

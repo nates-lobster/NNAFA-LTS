@@ -48,7 +48,6 @@ if %errorlevel% neq 0 (
     pause
     exit /b 1
 )
-)
 echo.
 
 :: Step 5: Extract Standalone Frontend

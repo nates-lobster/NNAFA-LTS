@@ -1,0 +1,587 @@
+{
+  "participant_id": "daddy_2",
+  "test_date": "2026-05-26 22:40:41",
+  "task_type": "Spatial Sequence",
+  "final_score": 1440,
+  "max_level": 8,
+  "end_reason": "10 trials completed!",
+  "total_duration_seconds": 389.45,
+  "periods": [
+    {
+      "level": 8,
+      "phase": "Encoding",
+      "is_control": true,
+      "start_seconds": 0,
+      "end_seconds": 11.13,
+      "duration_seconds": 11.13,
+      "metrics": {
+        "avg_delta": 887.66,
+        "avg_theta": 404.04,
+        "avg_alpha": 157.68,
+        "avg_beta": 120.31,
+        "avg_gamma": 13.44
+      }
+    },
+    {
+      "level": 8,
+      "phase": "Recall",
+      "is_control": true,
+      "start_seconds": 11.13,
+      "end_seconds": 18.53,
+      "duration_seconds": 7.4,
+      "metrics": {
+        "avg_delta": 1067.88,
+        "avg_theta": 441.17,
+        "avg_alpha": 139.36,
+        "avg_beta": 134.76,
+        "avg_gamma": 18.64
+      }
+    },
+    {
+      "level": 8,
+      "phase": "Encoding",
+      "is_control": false,
+      "start_seconds": 20.03,
+      "end_seconds": 31.16,
+      "duration_seconds": 11.12,
+      "metrics": {
+        "avg_delta": 607.28,
+        "avg_theta": 431.53,
+        "avg_alpha": 105,
+        "avg_beta": 115.97,
+        "avg_gamma": 12.94
+      }
+    },
+    {
+      "level": 8,
+      "phase": "Recall",
+      "is_control": false,
+      "start_seconds": 31.16,
+      "end_seconds": 36.73,
+      "duration_seconds": 5.57,
+      "metrics": {
+        "avg_delta": 214.92,
+        "avg_theta": 90.44,
+        "avg_alpha": 30.13,
+        "avg_beta": 28.16,
+        "avg_gamma": 4.13
+      }
+    },
+    {
+      "level": 8,
+      "phase": "Encoding",
+      "is_control": true,
+      "start_seconds": 39.24,
+      "end_seconds": 50.35,
+      "duration_seconds": 11.11,
+      "metrics": {
+        "avg_delta": 592.4,
+        "avg_theta": 225.11,
+        "avg_alpha": 59.05,
+        "avg_beta": 65.73,
+        "avg_gamma": 7.31
+      }
+    },
+    {
+      "level": 8,
+      "phase": "Recall",
+      "is_control": true,
+      "start_seconds": 50.35,
+      "end_seconds": 57.14,
+      "duration_seconds": 6.79,
+      "metrics": {
+        "avg_delta": 191.29,
+        "avg_theta": 103.5,
+        "avg_alpha": 20.02,
+        "avg_beta": 17.14,
+        "avg_gamma": 2.79
+      }
+    },
+    {
+      "level": 8,
+      "phase": "Encoding",
+      "is_control": false,
+      "start_seconds": 58.65,
+      "end_seconds": 69.77,
+      "duration_seconds": 11.12,
+      "metrics": {
+        "avg_delta": 273.38,
+        "avg_theta": 107.68,
+        "avg_alpha": 33.38,
+        "avg_beta": 32.34,
+        "avg_gamma": 5.49
+      }
+    },
+    {
+      "level": 8,
+      "phase": "Recall",
+      "is_control": false,
+      "start_seconds": 69.77,
+      "end_seconds": 78.84,
+      "duration_seconds": 9.07,
+      "metrics": {
+        "avg_delta": 131.1,
+        "avg_theta": 97.47,
+        "avg_alpha": 17.63,
+        "avg_beta": 18.18,
+        "avg_gamma": 2.91
+      }
+    },
+    {
+      "level": 8,
+      "phase": "Encoding",
+      "is_control": true,
+      "start_seconds": 80.35,
+      "end_seconds": 91.48,
+      "duration_seconds": 11.13,
+      "metrics": {
+        "avg_delta": 383.82,
+        "avg_theta": 147.11,
+        "avg_alpha": 31.26,
+        "avg_beta": 31.38,
+        "avg_gamma": 5.48
+      }
+    },
+    {
+      "level": 8,
+      "phase": "Recall",
+      "is_control": true,
+      "start_seconds": 91.48,
+      "end_seconds": 97.62,
+      "duration_seconds": 6.14,
+      "metrics": {
+        "avg_delta": 117.17,
+        "avg_theta": 47.97,
+        "avg_alpha": 17.66,
+        "avg_beta": 22.78,
+        "avg_gamma": 3.91
+      }
+    },
+    {
+      "level": 8,
+      "phase": "Encoding",
+      "is_control": false,
+      "start_seconds": 99.13,
+      "end_seconds": 110.24,
+      "duration_seconds": 11.11,
+      "metrics": {
+        "avg_delta": 177.23,
+        "avg_theta": 92.46,
+        "avg_alpha": 18.81,
+        "avg_beta": 17.08,
+        "avg_gamma": 3.18
+      }
+    },
+    {
+      "level": 8,
+      "phase": "Recall",
+      "is_control": false,
+      "start_seconds": 110.24,
+      "end_seconds": 117.78,
+      "duration_seconds": 7.54,
+      "metrics": {
+        "avg_delta": 88.7,
+        "avg_theta": 34.47,
+        "avg_alpha": 10.83,
+        "avg_beta": 16.02,
+        "avg_gamma": 2.51
+      }
+    },
+    {
+      "level": 8,
+      "phase": "Encoding",
+      "is_control": true,
+      "start_seconds": 119.3,
+      "end_seconds": 130.42,
+      "duration_seconds": 11.12,
+      "metrics": {
+        "avg_delta": 146.14,
+        "avg_theta": 59.84,
+        "avg_alpha": 12.08,
+        "avg_beta": 14.22,
+        "avg_gamma": 2.72
+      }
+    },
+    {
+      "level": 8,
+      "phase": "Recall",
+      "is_control": true,
+      "start_seconds": 130.42,
+      "end_seconds": 137.26,
+      "duration_seconds": 6.84,
+      "metrics": {
+        "avg_delta": 109.65,
+        "avg_theta": 72.75,
+        "avg_alpha": 11.63,
+        "avg_beta": 12,
+        "avg_gamma": 2.23
+      }
+    },
+    {
+      "level": 8,
+      "phase": "Encoding",
+      "is_control": false,
+      "start_seconds": 138.76,
+      "end_seconds": 149.89,
+      "duration_seconds": 11.13,
+      "metrics": {
+        "avg_delta": 131.46,
+        "avg_theta": 57.82,
+        "avg_alpha": 12.14,
+        "avg_beta": 14.68,
+        "avg_gamma": 2.96
+      }
+    },
+    {
+      "level": 8,
+      "phase": "Recall",
+      "is_control": false,
+      "start_seconds": 149.89,
+      "end_seconds": 155.88,
+      "duration_seconds": 5.99,
+      "metrics": {
+        "avg_delta": 14.89,
+        "avg_theta": 10.59,
+        "avg_alpha": 5.33,
+        "avg_beta": 8.53,
+        "avg_gamma": 2.21
+      }
+    },
+    {
+      "level": 8,
+      "phase": "Encoding",
+      "is_control": true,
+      "start_seconds": 157.39,
+      "end_seconds": 168.5,
+      "duration_seconds": 11.11,
+      "metrics": {
+        "avg_delta": 189.67,
+        "avg_theta": 115.14,
+        "avg_alpha": 21.24,
+        "avg_beta": 18.25,
+        "avg_gamma": 2.59
+      }
+    },
+    {
+      "level": 8,
+      "phase": "Recall",
+      "is_control": true,
+      "start_seconds": 168.5,
+      "end_seconds": 174.65,
+      "duration_seconds": 6.14,
+      "metrics": {
+        "avg_delta": 105.33,
+        "avg_theta": 67.64,
+        "avg_alpha": 16.22,
+        "avg_beta": 11.82,
+        "avg_gamma": 1.96
+      }
+    },
+    {
+      "level": 8,
+      "phase": "Encoding",
+      "is_control": false,
+      "start_seconds": 176.15,
+      "end_seconds": 187.27,
+      "duration_seconds": 11.12,
+      "metrics": {
+        "avg_delta": 163.35,
+        "avg_theta": 76.47,
+        "avg_alpha": 13.96,
+        "avg_beta": 16.89,
+        "avg_gamma": 3.23
+      }
+    },
+    {
+      "level": 8,
+      "phase": "Recall",
+      "is_control": false,
+      "start_seconds": 187.27,
+      "end_seconds": 193.98,
+      "duration_seconds": 6.7,
+      "metrics": {
+        "avg_delta": 70.55,
+        "avg_theta": 45.79,
+        "avg_alpha": 10.48,
+        "avg_beta": 10.12,
+        "avg_gamma": 2.12
+      }
+    },
+    {
+      "level": 8,
+      "phase": "Encoding",
+      "is_control": true,
+      "start_seconds": 195.48,
+      "end_seconds": 206.6,
+      "duration_seconds": 11.12,
+      "metrics": {
+        "avg_delta": 140.2,
+        "avg_theta": 99.07,
+        "avg_alpha": 17.47,
+        "avg_beta": 16.86,
+        "avg_gamma": 2.44
+      }
+    },
+    {
+      "level": 8,
+      "phase": "Recall",
+      "is_control": true,
+      "start_seconds": 206.6,
+      "end_seconds": 213.54,
+      "duration_seconds": 6.94,
+      "metrics": {
+        "avg_delta": 249.54,
+        "avg_theta": 103.31,
+        "avg_alpha": 16.79,
+        "avg_beta": 16.58,
+        "avg_gamma": 2.03
+      }
+    },
+    {
+      "level": 8,
+      "phase": "Encoding",
+      "is_control": false,
+      "start_seconds": 215.06,
+      "end_seconds": 226.18,
+      "duration_seconds": 11.12,
+      "metrics": {
+        "avg_delta": 158.3,
+        "avg_theta": 47.81,
+        "avg_alpha": 14.53,
+        "avg_beta": 18.51,
+        "avg_gamma": 3.56
+      }
+    },
+    {
+      "level": 8,
+      "phase": "Recall",
+      "is_control": false,
+      "start_seconds": 226.18,
+      "end_seconds": 232.19,
+      "duration_seconds": 6.02,
+      "metrics": {
+        "avg_delta": 162.75,
+        "avg_theta": 83.21,
+        "avg_alpha": 15.64,
+        "avg_beta": 15.95,
+        "avg_gamma": 2.76
+      }
+    },
+    {
+      "level": 8,
+      "phase": "Encoding",
+      "is_control": true,
+      "start_seconds": 233.7,
+      "end_seconds": 244.82,
+      "duration_seconds": 11.13,
+      "metrics": {
+        "avg_delta": 80.89,
+        "avg_theta": 28.36,
+        "avg_alpha": 16.35,
+        "avg_beta": 16.25,
+        "avg_gamma": 2.21
+      }
+    },
+    {
+      "level": 8,
+      "phase": "Recall",
+      "is_control": true,
+      "start_seconds": 244.82,
+      "end_seconds": 251.43,
+      "duration_seconds": 6.61,
+      "metrics": {
+        "avg_delta": 455.27,
+        "avg_theta": 122.58,
+        "avg_alpha": 23.97,
+        "avg_beta": 26.01,
+        "avg_gamma": 4.17
+      }
+    },
+    {
+      "level": 8,
+      "phase": "Encoding",
+      "is_control": false,
+      "start_seconds": 252.95,
+      "end_seconds": 264.07,
+      "duration_seconds": 11.13,
+      "metrics": {
+        "avg_delta": 108.38,
+        "avg_theta": 57.71,
+        "avg_alpha": 12.66,
+        "avg_beta": 13.5,
+        "avg_gamma": 2.47
+      }
+    },
+    {
+      "level": 8,
+      "phase": "Recall",
+      "is_control": false,
+      "start_seconds": 264.07,
+      "end_seconds": 270.72,
+      "duration_seconds": 6.65,
+      "metrics": {
+        "avg_delta": 64.38,
+        "avg_theta": 49.13,
+        "avg_alpha": 15.97,
+        "avg_beta": 17.6,
+        "avg_gamma": 2.76
+      }
+    },
+    {
+      "level": 8,
+      "phase": "Encoding",
+      "is_control": true,
+      "start_seconds": 272.22,
+      "end_seconds": 283.34,
+      "duration_seconds": 11.12,
+      "metrics": {
+        "avg_delta": 95.76,
+        "avg_theta": 49.74,
+        "avg_alpha": 15.17,
+        "avg_beta": 12.89,
+        "avg_gamma": 2.41
+      }
+    },
+    {
+      "level": 8,
+      "phase": "Recall",
+      "is_control": true,
+      "start_seconds": 283.34,
+      "end_seconds": 290.27,
+      "duration_seconds": 6.93,
+      "metrics": {
+        "avg_delta": 197.74,
+        "avg_theta": 66.08,
+        "avg_alpha": 17.17,
+        "avg_beta": 14.92,
+        "avg_gamma": 2.79
+      }
+    },
+    {
+      "level": 8,
+      "phase": "Encoding",
+      "is_control": false,
+      "start_seconds": 291.77,
+      "end_seconds": 302.89,
+      "duration_seconds": 11.12,
+      "metrics": {
+        "avg_delta": 141.55,
+        "avg_theta": 68.5,
+        "avg_alpha": 17.06,
+        "avg_beta": 16.78,
+        "avg_gamma": 2.84
+      }
+    },
+    {
+      "level": 8,
+      "phase": "Recall",
+      "is_control": false,
+      "start_seconds": 302.89,
+      "end_seconds": 308.6,
+      "duration_seconds": 5.71,
+      "metrics": {
+        "avg_delta": 210.82,
+        "avg_theta": 109.72,
+        "avg_alpha": 22.82,
+        "avg_beta": 17.63,
+        "avg_gamma": 2.3
+      }
+    },
+    {
+      "level": 8,
+      "phase": "Encoding",
+      "is_control": true,
+      "start_seconds": 311.11,
+      "end_seconds": 322.23,
+      "duration_seconds": 11.12,
+      "metrics": {
+        "avg_delta": 139.35,
+        "avg_theta": 59.1,
+        "avg_alpha": 16.98,
+        "avg_beta": 17.01,
+        "avg_gamma": 3.08
+      }
+    },
+    {
+      "level": 8,
+      "phase": "Recall",
+      "is_control": true,
+      "start_seconds": 322.23,
+      "end_seconds": 329.77,
+      "duration_seconds": 7.54,
+      "metrics": {
+        "avg_delta": 276.27,
+        "avg_theta": 59.53,
+        "avg_alpha": 21.97,
+        "avg_beta": 25.2,
+        "avg_gamma": 4.79
+      }
+    },
+    {
+      "level": 8,
+      "phase": "Encoding",
+      "is_control": false,
+      "start_seconds": 331.27,
+      "end_seconds": 342.39,
+      "duration_seconds": 11.12,
+      "metrics": {
+        "avg_delta": 141.94,
+        "avg_theta": 84.75,
+        "avg_alpha": 20.56,
+        "avg_beta": 19.24,
+        "avg_gamma": 3.35
+      }
+    },
+    {
+      "level": 8,
+      "phase": "Recall",
+      "is_control": false,
+      "start_seconds": 342.39,
+      "end_seconds": 349.63,
+      "duration_seconds": 7.24,
+      "metrics": {
+        "avg_delta": 212.11,
+        "avg_theta": 61.5,
+        "avg_alpha": 16.04,
+        "avg_beta": 16.28,
+        "avg_gamma": 2.84
+      }
+    },
+    {
+      "level": 8,
+      "phase": "Encoding",
+      "is_control": true,
+      "start_seconds": 351.15,
+      "end_seconds": 362.26,
+      "duration_seconds": 11.12,
+      "metrics": null
+    },
+    {
+      "level": 8,
+      "phase": "Recall",
+      "is_control": true,
+      "start_seconds": 362.26,
+      "end_seconds": 369.03,
+      "duration_seconds": 6.77,
+      "metrics": null
+    },
+    {
+      "level": 8,
+      "phase": "Encoding",
+      "is_control": false,
+      "start_seconds": 370.54,
+      "end_seconds": 381.65,
+      "duration_seconds": 11.11,
+      "metrics": null
+    },
+    {
+      "level": 8,
+      "phase": "Recall",
+      "is_control": false,
+      "start_seconds": 381.65,
+      "end_seconds": 387.94,
+      "duration_seconds": 6.29,
+      "metrics": null
+    }
+  ]
+}

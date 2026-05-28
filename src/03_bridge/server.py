@@ -91,7 +91,7 @@ async def lsl_connection_manager(stream):
             try:
                 # Resolving stream in a background thread to avoid blocking the asyncio loop!
                 logger.info("LSL Connection Manager: Attempting stream resolution...")
-                await asyncio.to_thread(stream.connect, timeout=1.0)
+                await asyncio.to_thread(stream.connect)
             except Exception as e:
                 logger.exception("LSL Connection Manager: Resolve task error:")
         await asyncio.sleep(5.0)  # Retry resolution every 5 seconds
@@ -210,6 +210,9 @@ async def eeg_loop(websocket):
                         payload.metrics.signal_integrity = telemetry_v1_pb2.YELLOW
             
             if payload is None:
+                # No data this tick; pause briefly to avoid busy loop
+                await asyncio.sleep(0.01)
+                continue
                 # No data this tick, check if we've stalled
                 is_stalled = (time.time() - last_data_time) > 2.0
                 payload = telemetry_v1_pb2.TelemetryPayload()

@@ -409,11 +409,14 @@
                                                     <Button x:Name="BtnSubmitMemory" Content="Submit" Click="BtnSubmitMemory_Click" Width="100" Padding="8" Background="#A6E3A1" Foreground="#11111B" FontWeight="Bold" BorderThickness="0" IsEnabled="False"/>
                                                 </StackPanel>
                                                 
-                                                <!-- Spatial timer adjust offset -->
+                                                <!-- Spatial timer adjust offset and level selection -->
                                                 <StackPanel x:Name="PanelSpatialTimeAdjuster" Orientation="Horizontal" Visibility="Collapsed" Margin="10,0,0,0">
                                                     <TextBlock Text="Time adjust/item:" Foreground="#A6ADC8" VerticalAlignment="Center" Margin="0,0,5,0" FontSize="12"/>
-                                                    <Slider x:Name="SliderSpatialTimeAdjuster" Width="120" Minimum="-5.0" Maximum="5.0" Value="0.0" TickFrequency="0.1" IsSnapToTickEnabled="True" VerticalAlignment="Center" ToolTip="Adjust display time per square (seconds)"/>
+                                                    <Slider x:Name="SliderSpatialTimeAdjuster" Width="100" Minimum="-5.0" Maximum="5.0" Value="0.0" TickFrequency="0.1" IsSnapToTickEnabled="True" VerticalAlignment="Center" ToolTip="Adjust display time per square (seconds)"/>
                                                     <TextBlock x:Name="TxtSpatialTimeOffset" Text="{Binding ElementName=SliderSpatialTimeAdjuster, Path=Value, StringFormat={}{0:+0.0;-0.0;0.0}s}" Foreground="#CDD6F4" Width="40" VerticalAlignment="Center" Margin="5,0,0,0" FontSize="12"/>
+                                                    <TextBlock Text="Level (4-12):" Foreground="#A6ADC8" VerticalAlignment="Center" Margin="10,0,5,0" FontSize="12"/>
+                                                    <Slider x:Name="SliderSpatialLevel" Width="100" Minimum="4" Maximum="12" Value="8" TickFrequency="1" IsSnapToTickEnabled="True" VerticalAlignment="Center" ToolTip="Adjust the number of squares in the trial (Level)"/>
+                                                    <TextBlock x:Name="TxtSpatialLevel" Text="{Binding ElementName=SliderSpatialLevel, Path=Value}" Foreground="#CDD6F4" Width="20" VerticalAlignment="Center" Margin="5,0,0,0" FontSize="12"/>
                                                 </StackPanel>
                                             </StackPanel>
                                         </Grid>
@@ -723,6 +726,32 @@
                                             <RadioButton x:Name="RbModeIirOnly" Content="Only IIR (Standard Feed)" Foreground="#CDD6F4" Margin="0,0,20,0" VerticalAlignment="Center" Checked="RbFilterMode_Checked"/>
                                             <RadioButton x:Name="RbModeFirOnly" Content="Only FIR (Linear Phase)" Foreground="#CDD6F4" VerticalAlignment="Center" Checked="RbFilterMode_Checked"/>
                                         </StackPanel>
+                                    </Border>
+                                </Grid>
+                            </TabItem>
+                            
+                            <!-- 4e. System Terminal Logs -->
+                            <TabItem Header="System Terminal Logs" Style="{StaticResource SubTabItemStyle}">
+                                <Grid Margin="10">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    
+                                    <TextBlock Text="Embedded LSL Python Backend Terminal" FontSize="16" FontWeight="Bold" Foreground="#89B4FA" Margin="0,0,0,10"/>
+                                    
+                                    <Border Grid.Row="1" Background="#11111B" CornerRadius="8" BorderBrush="#45475A" BorderThickness="1">
+                                        <TextBox x:Name="TxtSystemLogs" 
+                                                 Background="Transparent" 
+                                                 Foreground="#A6E3A1" 
+                                                 FontFamily="Consolas, Courier New, Monospace" 
+                                                 FontSize="12" 
+                                                 IsReadOnly="True" 
+                                                 TextWrapping="Wrap" 
+                                                 AcceptsReturn="True" 
+                                                 VerticalScrollBarVisibility="Auto" 
+                                                 Padding="10" 
+                                                 BorderThickness="0"/>
                                     </Border>
                                 </Grid>
                             </TabItem>

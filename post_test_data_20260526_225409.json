@@ -1,0 +1,377 @@
+{
+  "participant_id": "nate_02",
+  "test_date": "2026-05-26 22:54:09",
+  "task_type": "Spatial Sequence",
+  "final_score": 1530,
+  "max_level": 9,
+  "end_reason": "10 trials completed!",
+  "total_duration_seconds": 400.36,
+  "periods": [
+    {
+      "level": 9,
+      "phase": "Encoding",
+      "is_control": true,
+      "start_seconds": 0,
+      "end_seconds": 12.32,
+      "duration_seconds": 12.32,
+      "metrics": {
+        "avg_delta": 72.2,
+        "avg_theta": 34.36,
+        "avg_alpha": 9.92,
+        "avg_beta": 12.41,
+        "avg_gamma": 2.86
+      }
+    },
+    {
+      "level": 9,
+      "phase": "Recall",
+      "is_control": true,
+      "start_seconds": 12.32,
+      "end_seconds": 18.18,
+      "duration_seconds": 5.87,
+      "metrics": null
+    },
+    {
+      "level": 9,
+      "phase": "Encoding",
+      "is_control": false,
+      "start_seconds": 19.69,
+      "end_seconds": 32.03,
+      "duration_seconds": 12.34,
+      "metrics": null
+    },
+    {
+      "level": 9,
+      "phase": "Recall",
+      "is_control": false,
+      "start_seconds": 32.03,
+      "end_seconds": 38.98,
+      "duration_seconds": 6.95,
+      "metrics": null
+    },
+    {
+      "level": 9,
+      "phase": "Encoding",
+      "is_control": true,
+      "start_seconds": 40.49,
+      "end_seconds": 52.81,
+      "duration_seconds": 12.32,
+      "metrics": null
+    },
+    {
+      "level": 9,
+      "phase": "Recall",
+      "is_control": true,
+      "start_seconds": 52.81,
+      "end_seconds": 58.99,
+      "duration_seconds": 6.18,
+      "metrics": null
+    },
+    {
+      "level": 9,
+      "phase": "Encoding",
+      "is_control": false,
+      "start_seconds": 60.5,
+      "end_seconds": 72.82,
+      "duration_seconds": 12.31,
+      "metrics": null
+    },
+    {
+      "level": 9,
+      "phase": "Recall",
+      "is_control": false,
+      "start_seconds": 72.82,
+      "end_seconds": 79.04,
+      "duration_seconds": 6.23,
+      "metrics": null
+    },
+    {
+      "level": 9,
+      "phase": "Encoding",
+      "is_control": true,
+      "start_seconds": 80.55,
+      "end_seconds": 92.86,
+      "duration_seconds": 12.31,
+      "metrics": null
+    },
+    {
+      "level": 9,
+      "phase": "Recall",
+      "is_control": true,
+      "start_seconds": 92.86,
+      "end_seconds": 99.09,
+      "duration_seconds": 6.23,
+      "metrics": null
+    },
+    {
+      "level": 9,
+      "phase": "Encoding",
+      "is_control": false,
+      "start_seconds": 100.59,
+      "end_seconds": 112.93,
+      "duration_seconds": 12.33,
+      "metrics": null
+    },
+    {
+      "level": 9,
+      "phase": "Recall",
+      "is_control": false,
+      "start_seconds": 112.93,
+      "end_seconds": 119.93,
+      "duration_seconds": 7,
+      "metrics": null
+    },
+    {
+      "level": 9,
+      "phase": "Encoding",
+      "is_control": true,
+      "start_seconds": 121.44,
+      "end_seconds": 133.76,
+      "duration_seconds": 12.32,
+      "metrics": null
+    },
+    {
+      "level": 9,
+      "phase": "Recall",
+      "is_control": true,
+      "start_seconds": 133.76,
+      "end_seconds": 140.24,
+      "duration_seconds": 6.48,
+      "metrics": null
+    },
+    {
+      "level": 9,
+      "phase": "Encoding",
+      "is_control": false,
+      "start_seconds": 141.75,
+      "end_seconds": 154.08,
+      "duration_seconds": 12.33,
+      "metrics": null
+    },
+    {
+      "level": 9,
+      "phase": "Recall",
+      "is_control": false,
+      "start_seconds": 154.08,
+      "end_seconds": 159.5,
+      "duration_seconds": 5.42,
+      "metrics": null
+    },
+    {
+      "level": 9,
+      "phase": "Encoding",
+      "is_control": true,
+      "start_seconds": 161.01,
+      "end_seconds": 173.33,
+      "duration_seconds": 12.32,
+      "metrics": null
+    },
+    {
+      "level": 9,
+      "phase": "Recall",
+      "is_control": true,
+      "start_seconds": 173.33,
+      "end_seconds": 177.81,
+      "duration_seconds": 4.48,
+      "metrics": null
+    },
+    {
+      "level": 9,
+      "phase": "Encoding",
+      "is_control": false,
+      "start_seconds": 179.32,
+      "end_seconds": 191.63,
+      "duration_seconds": 12.31,
+      "metrics": null
+    },
+    {
+      "level": 9,
+      "phase": "Recall",
+      "is_control": false,
+      "start_seconds": 191.63,
+      "end_seconds": 196.86,
+      "duration_seconds": 5.23,
+      "metrics": null
+    },
+    {
+      "level": 9,
+      "phase": "Encoding",
+      "is_control": true,
+      "start_seconds": 198.37,
+      "end_seconds": 210.69,
+      "duration_seconds": 12.32,
+      "metrics": null
+    },
+    {
+      "level": 9,
+      "phase": "Recall",
+      "is_control": true,
+      "start_seconds": 210.69,
+      "end_seconds": 215.35,
+      "duration_seconds": 4.65,
+      "metrics": null
+    },
+    {
+      "level": 9,
+      "phase": "Encoding",
+      "is_control": false,
+      "start_seconds": 216.85,
+      "end_seconds": 229.18,
+      "duration_seconds": 12.33,
+      "metrics": null
+    },
+    {
+      "level": 9,
+      "phase": "Recall",
+      "is_control": false,
+      "start_seconds": 229.18,
+      "end_seconds": 232.84,
+      "duration_seconds": 3.66,
+      "metrics": null
+    },
+    {
+      "level": 9,
+      "phase": "Encoding",
+      "is_control": true,
+      "start_seconds": 235.35,
+      "end_seconds": 247.67,
+      "duration_seconds": 12.32,
+      "metrics": null
+    },
+    {
+      "level": 9,
+      "phase": "Recall",
+      "is_control": true,
+      "start_seconds": 247.67,
+      "end_seconds": 252.85,
+      "duration_seconds": 5.18,
+      "metrics": null
+    },
+    {
+      "level": 9,
+      "phase": "Encoding",
+      "is_control": false,
+      "start_seconds": 254.36,
+      "end_seconds": 266.68,
+      "duration_seconds": 12.32,
+      "metrics": null
+    },
+    {
+      "level": 9,
+      "phase": "Recall",
+      "is_control": false,
+      "start_seconds": 266.68,
+      "end_seconds": 270.86,
+      "duration_seconds": 4.19,
+      "metrics": null
+    },
+    {
+      "level": 9,
+      "phase": "Encoding",
+      "is_control": true,
+      "start_seconds": 272.37,
+      "end_seconds": 284.7,
+      "duration_seconds": 12.33,
+      "metrics": null
+    },
+    {
+      "level": 9,
+      "phase": "Recall",
+      "is_control": true,
+      "start_seconds": 284.7,
+      "end_seconds": 289.7,
+      "duration_seconds": 5,
+      "metrics": null
+    },
+    {
+      "level": 9,
+      "phase": "Encoding",
+      "is_control": false,
+      "start_seconds": 291.21,
+      "end_seconds": 303.52,
+      "duration_seconds": 12.31,
+      "metrics": null
+    },
+    {
+      "level": 9,
+      "phase": "Recall",
+      "is_control": false,
+      "start_seconds": 303.52,
+      "end_seconds": 307.91,
+      "duration_seconds": 4.39,
+      "metrics": null
+    },
+    {
+      "level": 9,
+      "phase": "Encoding",
+      "is_control": true,
+      "start_seconds": 310.41,
+      "end_seconds": 322.73,
+      "duration_seconds": 12.32,
+      "metrics": null
+    },
+    {
+      "level": 9,
+      "phase": "Recall",
+      "is_control": true,
+      "start_seconds": 322.73,
+      "end_seconds": 337.52,
+      "duration_seconds": 14.79,
+      "metrics": null
+    },
+    {
+      "level": 9,
+      "phase": "Encoding",
+      "is_control": false,
+      "start_seconds": 339.03,
+      "end_seconds": 351.37,
+      "duration_seconds": 12.34,
+      "metrics": null
+    },
+    {
+      "level": 9,
+      "phase": "Recall",
+      "is_control": false,
+      "start_seconds": 351.37,
+      "end_seconds": 353.87,
+      "duration_seconds": 2.5,
+      "metrics": null
+    },
+    {
+      "level": 9,
+      "phase": "Encoding",
+      "is_control": true,
+      "start_seconds": 356.39,
+      "end_seconds": 368.71,
+      "duration_seconds": 12.32,
+      "metrics": null
+    },
+    {
+      "level": 9,
+      "phase": "Recall",
+      "is_control": true,
+      "start_seconds": 368.71,
+      "end_seconds": 379.43,
+      "duration_seconds": 10.72,
+      "metrics": null
+    },
+    {
+      "level": 9,
+      "phase": "Encoding",
+      "is_control": false,
+      "start_seconds": 380.94,
+      "end_seconds": 393.26,
+      "duration_seconds": 12.32,
+      "metrics": null
+    },
+    {
+      "level": 9,
+      "phase": "Recall",
+      "is_control": false,
+      "start_seconds": 393.26,
+      "end_seconds": 398.85,
+      "duration_seconds": 5.59,
+      "metrics": null
+    }
+  ]
+}

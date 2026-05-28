@@ -38,6 +38,22 @@ namespace Frontend
             }
         }
 
+        private void LogToTerminal(string message, bool isError = false)
+        {
+            if (string.IsNullOrEmpty(message)) return;
+            string timeStr = DateTime.Now.ToString("HH:mm:ss.fff");
+            string prefix = isError ? "[ERROR]" : "[INFO]";
+            string formattedMsg = $"{timeStr} {prefix} {message}\n";
+
+            Dispatcher.InvokeAsync(() =>
+            {
+                if (TxtSystemLogs != null)
+                {
+                    TxtSystemLogs.AppendText(formattedMsg);
+                    TxtSystemLogs.ScrollToEnd();
+                }
+            });
+        }
         private readonly TelemetryClient _telemetryClient;
         private readonly CancellationTokenSource _cts = new();
         private Process? _lslProcess;
@@ -76,6 +92,7 @@ namespace Frontend
         private int _memoryLevel = 3;
         private int _memoryScore = 0;
         private int _memoryStrikes = 0;
+        private int _totalTrialsPlayed = 0;
         private string _sequenceString = "";
         private bool _isDisplayingSequence = false;
         private bool _isGameRunning = false;
@@ -89,6 +106,8 @@ namespace Frontend
         private int _spatialNextExpectedValue = 1;
         private bool _isSpatialClickActive = false;
         private System.Windows.Threading.DispatcherTimer? _spatialMaskTimer;
+        private System.Windows.Shapes.Ellipse? _neonGazeDot;
+        private System.Windows.Threading.DispatcherTimer? _neonGazeTimer;
         private readonly System.Collections.Generic.List<Border> _spatialSquares = new();
         private readonly System.Collections.Generic.List<int> _spatialSquareValues = new();
         private bool _isControlTrial = true;
@@ -676,17 +695,25 @@ namespace Frontend
                     }
                 }
 
+                string participantId = "unknown";
+                Dispatcher.Invoke(() => {
+                    if (TxtParticipantId != null)
+                    {
+                        participantId = TxtParticipantId.Text.Trim();
+                    }
+                });
+                if (string.IsNullOrEmpty(participantId)) participantId = "unknown";
+
                 var resultData = new
                 {
+                    participant_id = participantId,
                     test_date = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
                     task_type = _selectedTaskType == 0 ? "Digit Recall" : "Spatial Sequence",
                     final_score = _memoryScore,
                     max_level = _memoryLevel,
                     end_reason = endMessage,
                     total_duration_seconds = Math.Round(totalDuration, 2),
-                    intervals = intervalsList,
-                    events = eventsList,
-                    trials = ParseTrials()
+                    periods = intervalsList
                 };
 
                 // Serialize to JSON
@@ -702,7 +729,7 @@ namespace Frontend
                 System.IO.File.WriteAllText(latestPath, json);
 
                 // Also save in scratch of conversation dir if accessible
-                string scratchDir = @"C:\Users\Nate\.gemini\antigravity\brain\6f955eca-6cd3-468b-8607-6eef63ba3bf7\scratch";
+                string scratchDir = @"C:\Users\Nate\.gemini\antigravity\brain\73af7c12-0277-428f-8f75-2d45bc6369c7\scratch";
                 if (System.IO.Directory.Exists(scratchDir))
                 {
                     System.IO.File.WriteAllText(System.IO.Path.Combine(scratchDir, filename), json);
@@ -1756,21 +1783,26 @@ namespace Frontend
 
                 _lslProcess.OutputDataReceived += (s, ev) => 
                 {
-                    if (!string.IsNullOrEmpty(ev.Data) && ev.Data.Contains("[STATUS]"))
+                    if (!string.IsNullOrEmpty(ev.Data))
                     {
-                        string status = ev.Data.Replace("[STATUS]", "").Trim();
-                        Dispatcher.Invoke(() => 
+                        LogToTerminal(ev.Data, false);
+                        
+                        if (ev.Data.Contains("[STATUS]"))
                         {
-                            if (TxtLslStatus != null) QueueLslMessage($"Status: {status}");
-                            if (status == "CONNECTED")
+                            string status = ev.Data.Replace("[STATUS]", "").Trim();
+                            Dispatcher.Invoke(() => 
                             {
-                                BtnToggleLsl.Background = Brushes.LimeGreen;
-                            }
-                            else if (status.Contains("ERROR"))
-                            {
-                                BtnToggleLsl.Background = Brushes.Red;
-                            }
-                        });
+                                if (TxtLslStatus != null) QueueLslMessage($"Status: {status}");
+                                if (status == "CONNECTED")
+                                {
+                                    BtnToggleLsl.Background = Brushes.LimeGreen;
+                                }
+                                else if (status.Contains("ERROR"))
+                                {
+                                    BtnToggleLsl.Background = Brushes.Red;
+                                }
+                            });
+                        }
                     }
                 };
 
@@ -1778,6 +1810,8 @@ namespace Frontend
                 {
                     if (!string.IsNullOrEmpty(ev.Data))
                     {
+                        LogToTerminal(ev.Data, true);
+                        
                         // Ignore non-error strings that liblsl/native DLLs print to stderr
                         if (ev.Data.Contains("INFO|") || ev.Data.Contains("DEBUG|")) return;
 
@@ -1917,7 +1951,8 @@ namespace Frontend
             UpdateTrendPlot();
 
             _isGameRunning = true;
-            _memoryLevel = _selectedTaskType == 0 ? 3 : 8; // spatial starts at 8
+            _totalTrialsPlayed = 0;
+            _memoryLevel = _selectedTaskType == 0 ? 3 : (int)SliderSpatialLevel.Value;
             _memoryScore = 0;
             _memoryStrikes = 0;
             _isControlTrial = true;
@@ -2105,7 +2140,14 @@ namespace Frontend
             }
             TxtMemoryLevel.Text = $"Level: {_memoryLevel} ({typeLabel}){phaseLabel}";
             TxtMemoryScore.Text = $"Score: {_memoryScore}";
-            TxtMemoryStrikes.Text = $"Strikes: {_memoryStrikes}/3";
+            if (_selectedTaskType == 0)
+            {
+                TxtMemoryStrikes.Text = $"Strikes: {_memoryStrikes}/3";
+            }
+            else
+            {
+                TxtMemoryStrikes.Text = $"Trial: {_totalTrialsPlayed}/10";
+            }
         }
 
         private void EndMemoryGame(string message)
@@ -2120,6 +2162,7 @@ namespace Frontend
                 _spatialMaskTimer.Stop();
                 _spatialMaskTimer = null;
             }
+            StopNeonGazeDot();
 
             CanvasSpatialMemory.Children.Clear();
 
@@ -2316,11 +2359,115 @@ namespace Frontend
                 MaskSpatialSquares();
             };
             _spatialMaskTimer.Start();
+            StartNeonGazeDot();
+        }
+
+        private void StartNeonGazeDot()
+        {
+            if (!_isControlTrial || _spatialSquares.Count == 0) return;
+
+            // Create neon green dot with DropShadow glow effect
+            _neonGazeDot = new System.Windows.Shapes.Ellipse
+            {
+                Width = 14,
+                Height = 14,
+                Fill = (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFrom("#A6E3A1")!,
+                Effect = new System.Windows.Media.Effects.DropShadowEffect
+                {
+                    Color = (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#A6E3A1"),
+                    BlurRadius = 18,
+                    ShadowDepth = 0,
+                    Opacity = 1.0
+                }
+            };
+            System.Windows.Controls.Panel.SetZIndex(_neonGazeDot, 10);
+
+            // Shuffled sequence of target square indices
+            var indices = new System.Collections.Generic.List<int>();
+            for (int i = 0; i < _spatialSquares.Count; i++) indices.Add(i);
+
+            for (int i = indices.Count - 1; i > 0; i--)
+            {
+                int k = _random.Next(i + 1);
+                int temp = indices[i];
+                indices[i] = indices[k];
+                indices[k] = temp;
+            }
+
+            int currentIdx = 0;
+
+            void MoveDotToSquare(Border square)
+            {
+                if (_neonGazeDot == null) return;
+                double sqLeft = System.Windows.Controls.Canvas.GetLeft(square);
+                double sqTop = System.Windows.Controls.Canvas.GetTop(square);
+                double centerX = sqLeft + square.Width / 2;
+                double centerY = sqTop + square.Height / 2;
+
+                System.Windows.Controls.Canvas.SetLeft(_neonGazeDot, centerX - _neonGazeDot.Width / 2);
+                System.Windows.Controls.Canvas.SetTop(_neonGazeDot, centerY - _neonGazeDot.Height / 2);
+
+                if (!CanvasSpatialMemory.Children.Contains(_neonGazeDot))
+                {
+                    CanvasSpatialMemory.Children.Add(_neonGazeDot);
+                }
+            }
+
+            if (indices.Count > 0)
+            {
+                MoveDotToSquare(_spatialSquares[indices[0]]);
+            }
+
+            _neonGazeTimer = new System.Windows.Threading.DispatcherTimer();
+            _neonGazeTimer.Interval = TimeSpan.FromSeconds(1);
+            _neonGazeTimer.Tick += (s, e) =>
+            {
+                if (!_isGameRunning || _neonGazeDot == null || _spatialSquares.Count == 0)
+                {
+                    StopNeonGazeDot();
+                    return;
+                }
+
+                currentIdx++;
+                if (currentIdx >= indices.Count)
+                {
+                    // Reshuffle indices for next loop pass
+                    for (int i = indices.Count - 1; i > 0; i--)
+                    {
+                        int k = _random.Next(i + 1);
+                        int temp = indices[i];
+                        indices[i] = indices[k];
+                        indices[k] = temp;
+                    }
+                    currentIdx = 0;
+                }
+
+                MoveDotToSquare(_spatialSquares[indices[currentIdx]]);
+            };
+            _neonGazeTimer.Start();
+        }
+
+        private void StopNeonGazeDot()
+        {
+            if (_neonGazeTimer != null)
+            {
+                _neonGazeTimer.Stop();
+                _neonGazeTimer = null;
+            }
+            if (_neonGazeDot != null)
+            {
+                if (CanvasSpatialMemory.Children.Contains(_neonGazeDot))
+                {
+                    CanvasSpatialMemory.Children.Remove(_neonGazeDot);
+                }
+                _neonGazeDot = null;
+            }
         }
 
         private void MaskSpatialSquares()
         {
             if (!_isGameRunning) return;
+            StopNeonGazeDot();
 
             StartCognitiveInterval(isEncoding: false, level: _memoryLevel, isControl: _isControlTrial);
             if (_isControlTrial)
@@ -2421,19 +2568,17 @@ namespace Frontend
 
                         _memoryScore += _memoryLevel * 10;
                         _isControlTrial = true; // Transition to Control trial
-                        _totalCalibrationTrials++;
-                        if (!_isLevelLocked) {
-                            _memoryLevel += 2; // user right -> add 2
-                            if (_totalCalibrationTrials >= 10) {
-                                _isLevelLocked = true;
-                                _lockedTrialsCount = 0;
-                            }
-                        }
+                        _totalTrialsPlayed++;
 
                         TxtSpatialStatus.Text = "CORRECT!";
                         TxtSpatialStatus.Foreground = (Brush)new BrushConverter().ConvertFrom("#A6E3A1")!;
 
                         UpdateMemoryGameStats();
+                        if (_totalTrialsPlayed >= 10)
+                        {
+                            _ = Task.Delay(1500).ContinueWith(t => Dispatcher.Invoke(() => EndMemoryGame("10 trials completed!")));
+                            return;
+                        }
                         await Task.Delay(1500);
                         await StartNewSpatialRoundAsync();
                     }
@@ -2441,24 +2586,11 @@ namespace Frontend
                 else
                 {
                     _isSpatialClickActive = false;
-                    _memoryStrikes++;
                     FinalizeActiveInterval();
-                    RecordCognitiveEvent($"Spatial set {_memoryLevel} recall incorrect (Strike {_memoryStrikes}/3)", false);
+                    RecordCognitiveEvent($"Spatial set {_memoryLevel} recall incorrect", false);
 
-                    _totalCalibrationTrials++;
-                    if (!_isLevelLocked)
-                    {
-                        if (_memoryLevel > 3) {
-                            _memoryLevel--; // user wrong -> subtract 1
-                        }
-                        if (_totalCalibrationTrials >= 10) {
-                            _isLevelLocked = true;
-                            _lockedTrialsCount = 0;
-                        }
-                    }
-
-                    // Reset sequence to Control trial at the adapted level
-                    _isControlTrial = true;
+                    _totalTrialsPlayed++;
+                    _isControlTrial = true; // Transition to Control trial
 
                     TxtSpatialStatus.Text = "INCORRECT!";
                     TxtSpatialStatus.Foreground = (Brush)new BrushConverter().ConvertFrom("#F38BA8")!;
@@ -2487,16 +2619,13 @@ namespace Frontend
 
                     UpdateMemoryGameStats();
 
-                    if (_memoryStrikes >= 3)
+                    if (_totalTrialsPlayed >= 10)
                     {
-                        await Task.Delay(2000);
-                        EndMemoryGame("Strikes 3/3. Game Over!");
+                        _ = Task.Delay(2500).ContinueWith(t => Dispatcher.Invoke(() => EndMemoryGame("10 trials completed!")));
+                        return;
                     }
-                    else
-                    {
-                        await Task.Delay(2500);
-                        await StartNewSpatialRoundAsync();
-                    }
+                    await Task.Delay(2500);
+                    await StartNewSpatialRoundAsync();
                 }
             }
         }

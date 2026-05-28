@@ -1,4 +1,4 @@
 @echo off
 echo Starting NNAFA LSL Emulator...
-.\venv\Scripts\activate.bat & python src/01_ingestion/emulator.py
+.\venv\Scripts\python.exe src/01_ingestion/emulator.py
 pause

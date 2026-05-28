@@ -75,10 +75,13 @@ def main():
         sampling_rate = board.get_sampling_rate(args.board_id)
         logging.info(f"Board EEG channels: {eeg_channels}, Sampling rate: {sampling_rate}Hz")
         
-        info = StreamInfo('Muse', 'EEG', 5, sampling_rate, 'float32', 'brainflow_bridge_001')
-        
+        channel_count = len(eeg_channels) + 1  # EEG channels plus AUX placeholder
+        info = StreamInfo('Muse', 'EEG', channel_count, sampling_rate, 'float32', 'brainflow_bridge_001')
+
         channels = info.desc().append_child("channels")
-        for label in ["TP9", "AF7", "AF8", "TP10", "AUX"]:
+        # Use default labels for known EEG channels; extra channel labeled AUX
+        default_labels = ["TP9", "AF7", "AF8", "TP10", "AUX"]
+        for i, label in enumerate(default_labels[:channel_count]):
             channels.append_child("channel").append_child_value("label", label).append_child_value("unit", "microvolts").append_child_value("type", "EEG")
 
         logging.info("Initializing LSL StreamOutlet...")
@@ -94,13 +97,12 @@ def main():
             if data is not None and data.shape[1] > 0:
                 eeg_data = data[eeg_channels]
                 num_samples = eeg_data.shape[1]
-                lsl_payload = np.zeros((5, num_samples))
-                rows_to_copy = min(5, eeg_data.shape[0])
+                # Build payload matching the channel count defined above
+                lsl_payload = np.zeros((channel_count, num_samples))
+                rows_to_copy = min(channel_count, eeg_data.shape[0])
                 lsl_payload[:rows_to_copy, :] = eeg_data[:rows_to_copy, :]
-                
-                samples = lsl_payload.T.tolist()
-                for sample in samples:
-                    outlet.push_sample(sample)
+                # Push the whole batch as a chunk for efficiency
+                outlet.push_chunk(lsl_payload.T.tolist())
                 
                 sample_count += num_samples
                 
