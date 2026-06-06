@@ -15,3 +15,7 @@ obj/
 # ignore all deploy files except zip
 deploy/*
 !deploy/*.zip
+
+
+
+audio_chimp_1.py
